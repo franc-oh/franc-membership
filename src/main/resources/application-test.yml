@@ -21,7 +21,7 @@ spring:
   sql:
     init:
       schema-locations: classpath:init-data/h2db/schema.sql
-      #data-locations: classpath:init-data/h2db/data.sql
+      data-locations: classpath:init-data/h2db/data.sql
       username: membership
       password: membership
       mode: always
