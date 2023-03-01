@@ -2,3 +2,16 @@ server:
   port: 8090
   tomcat:
     uri-encoding: UTF-8
+
+mybatis:
+  type-aliases-package: com.franc.app.membership.vo
+  mapper-locations: classpath:/mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+
+jasypt:
+  encryptor:
+    bean: jasyptStringEncryptor
+    property:
+      prefix: ENC(
+      suffix: )
