@@ -15,15 +15,15 @@ spring:
   datasource:
     driver-class-name: org.h2.Driver
     url: jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1
-    username: membership
-    password: membership
+    username: ENC(yiHWk9sHcZ8Ya0FTwaF3Il6WOCcyVQPq)
+    password: ENC(h8Y0ax0gnfZVqBNUXY/BtEQItzVmjeoB)
 
   sql:
     init:
       schema-locations: classpath:init-data/h2db/schema.sql
-      #data-locations: classpath:init-data/h2db/data.sql
-      username: membership
-      password: membership
+      data-locations: classpath:init-data/h2db/data.sql
+      username: ENC(yiHWk9sHcZ8Ya0FTwaF3Il6WOCcyVQPq)
+      password: ENC(h8Y0ax0gnfZVqBNUXY/BtEQItzVmjeoB)
       mode: always
       encoding: UTF-8
 
@@ -31,4 +31,3 @@ spring:
     console:
       enabled: true
       path: /h2-console
-
