@@ -1,7 +1,9 @@
 package com.franc.app.config;
 
+import com.franc.app.util.JasyptUtil;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
 import org.jasypt.encryption.pbe.config.SimpleStringPBEConfig;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,7 +20,8 @@ public class JasyptConfigTest {
     private String encryptKey;
 
     @Test
-    public void jasypt() {
+    @DisplayName("jasyptConfig_설정값_테스트")
+    public void jasypt_config_test() {
         // # Given
         String value = "test";
         String encValue = jasyptEncoding(value);
@@ -29,8 +32,27 @@ public class JasyptConfigTest {
         // # Then
         assertThat(decValue).isEqualTo(value);
 
+    }
+
+    @Test
+    @DisplayName("jasypt_유틸_테스트")
+    public void jasypt_util_test() {
+        // # Given
+        String value = "test";
+        String encValue = JasyptUtil.encoding(value);
+
+        // # When
+        String decValue = JasyptUtil.decoding(encValue);
+
+        // # Then
+        assertThat(decValue).isEqualTo(value);
 
     }
+
+
+
+
+
 
     public String jasyptEncoding(String value) {
         StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
