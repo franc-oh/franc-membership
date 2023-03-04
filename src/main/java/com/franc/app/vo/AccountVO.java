@@ -1,5 +1,6 @@
-package com.franc.app.membership.vo;
+package com.franc.app.vo;
 
+import com.franc.app.code.Code;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -8,22 +9,22 @@ import java.time.LocalDateTime;
 @ToString
 @EqualsAndHashCode(of = "accountId")
 @NoArgsConstructor
-public class AccountVo {
+public class AccountVO {
 
     private Long accountId;
     private String accountNm;
-    private Character status;
+    private Character status = Code.STATUS_USE;
     private String birth;
     private String hphone;
     private String email;
-    private String accountGrade;
+    private String accountGrade = Code.ACCOUNT_GRADE_USER;
     private LocalDateTime insertDate;
     private String insertUser;
     private LocalDateTime updateDate;
     private String updateUser;
 
     @Builder
-    public AccountVo(Long accountId, String accountNm, Character status, String birth, String hphone, String email, String accountGrade, String insertUser, String updateUser) {
+    public AccountVO(Long accountId, String accountNm, Character status, String birth, String hphone, String email, String accountGrade, String insertUser, String updateUser) {
         this.accountId = accountId;
         this.accountNm = accountNm;
         this.status = status;

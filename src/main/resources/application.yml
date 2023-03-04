@@ -4,7 +4,7 @@ server:
     uri-encoding: UTF-8
 
 mybatis:
-  type-aliases-package: com.franc.app.membership.vo
+  type-aliases-package: com.franc.app.vo
   mapper-locations: classpath:/mapper/**/*.xml
   configuration:
     map-underscore-to-camel-case: true

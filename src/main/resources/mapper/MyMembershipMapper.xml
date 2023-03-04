@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.franc.app.mapper.MyMembershipMapper">
+
+    <select id="getBarcodeSeq" resultType="int">
+        /** AccountMapper.getBarcodeSeq */
+        VALUES NEXT VALUE FOR MEMBERSHIP.BARCODE_SEQ
+    </select>
+
+    <insert id="save" parameterType="MyMembershipVo">
+        /** MyMembershipMapper.save */
+        INSERT INTO TB_MY_MEMBERSHIP
+        VALUES (
+            #{accountId},
+            #{mspId},
+            #{status},
+            #{totalAccumPoint},
+            #{mspGradeCd},
+            NOW(),
+            NULL,
+            #{barCd}
+        )
+    </insert>
+
+    <update id="rejoin" parameterType="MyMembershipVo">
+        /** MyMembershipMapper.rejoin */
+        UPDATE TB_MY_MEMBERSHIP
+           SET STATUS = '1'
+             , WITHDRAWAL = NULL
+         WHERE ACCOUNT_ID = #{accountId}
+           AND MSP_ID = #{mspId}
+    </update>
+
+    <select id="findById" parameterType="java.util.Map" resultType="MyMembershipVo">
+        SELECT A.*
+          FROM TB_MY_MEMBERSHIP A
+         WHERE 1=1
+           AND A.ACCOUNT_ID = #{accountId}
+           AND A.MSP_ID = #{mspId}
+    </select>
+
+
+</mapper>
