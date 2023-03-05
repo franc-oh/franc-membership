@@ -7,16 +7,17 @@ import com.franc.app.mapper.MyMembershipMapper;
 import com.franc.app.util.DateUtil;
 import com.franc.app.vo.MyMembershipVO;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class MyMembershipService {
+    private static final Logger logger = LoggerFactory.getLogger(MyMembershipService.class);
 
     private final MyMembershipMapper myMembershipMapper;
 
@@ -40,7 +41,7 @@ public class MyMembershipService {
         StringBuilder barcode = new StringBuilder(DateUtil.nowDateToString());
         barcode.append(fullSeq);
 
-        log.debug("createBarcode => " + barcode.toString());
+        logger.debug("createBarcode => " + barcode.toString());
 
         return barcode.toString();
     }
@@ -52,7 +53,7 @@ public class MyMembershipService {
      * @throws Exception
      */
     public void save(MyMembershipVO paramVo) throws Exception {
-        log.info("My Membership Save Start : " + paramVo.toString());
+        logger.info("My Membership Save Start : " + paramVo.toString());
 
         // #1. 해당 ID로 등록된 멤버십 가져오기
         Map<String, Object> myMembershipIdMap = new HashMap<>();
@@ -88,7 +89,7 @@ public class MyMembershipService {
             myMembershipMapper.rejoin(paramVo);
         }
 
-        log.info("My Membership Save Success!!");
+        logger.info("My Membership Save Success!!");
 
     }
 

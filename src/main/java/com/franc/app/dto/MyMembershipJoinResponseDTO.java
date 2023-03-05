@@ -7,6 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString
 public class MyMembershipJoinResponseDTO {
     private String resultCode;
     private String resultMessage;

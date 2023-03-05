@@ -8,7 +8,8 @@ import com.franc.app.service.MyMembershipService;
 import com.franc.app.vo.AccountVO;
 import com.franc.app.vo.MyMembershipVO;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,8 +22,9 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("/api/msp/my_membership")
 @RequiredArgsConstructor
-@Slf4j
 public class MyMembershipController {
+    private static final Logger logger = LoggerFactory.getLogger(MyMembershipController.class);
+
 
     private final MyMembershipService myMembershipService;
 
@@ -32,7 +34,7 @@ public class MyMembershipController {
     public ResponseEntity<?> join(@RequestBody @Valid MyMembershipJoinRequestDTO request) throws Exception {
         MyMembershipJoinResponseDTO response = new MyMembershipJoinResponseDTO();
 
-        log.info("멤버십가입_Request => {}", request.toString());
+        logger.info("멤버십가입_Request => {}", request.toString());
 
         // #1. 사용자 체크 및 가져오기
         AccountVO accountVO = accountService.getInfoAndCheckStatus(request.getAccountId());
@@ -47,7 +49,7 @@ public class MyMembershipController {
         response.setResultCode(Code.RESPONSE_CODE_SUCCESS);
         response.setResultMessage(Code.RESPONSE_MESSAGE_SUCCESS);
 
-        log.info("멤버십가입_Response => {}", response.toString());
+        logger.info("멤버십가입_Response => {}", response.toString());
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
