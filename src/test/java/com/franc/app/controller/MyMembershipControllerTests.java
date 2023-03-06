@@ -60,7 +60,7 @@ public class MyMembershipControllerTests {
         objectMapper = new ObjectMapper();
     }
 
-    private static final String JOIN_URL = "/api/msp/my_membership/join";
+    private static final String JOIN_URL = "/api/msp/my_membership";
 
     @ParameterizedTest
     @MethodSource("join_fail_valid_params")

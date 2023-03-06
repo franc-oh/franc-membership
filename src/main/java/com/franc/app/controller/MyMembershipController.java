@@ -30,7 +30,13 @@ public class MyMembershipController {
 
     private final AccountService accountService;
 
-    @PostMapping("/join")
+    /**
+     * 멤버십 가입
+     * @param request
+     * @return
+     * @throws Exception
+     */
+    @PostMapping
     public ResponseEntity<?> join(@RequestBody @Valid MyMembershipJoinRequestDTO request) throws Exception {
         MyMembershipJoinResponseDTO response = new MyMembershipJoinResponseDTO();
 

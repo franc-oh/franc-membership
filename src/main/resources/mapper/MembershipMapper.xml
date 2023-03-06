@@ -27,7 +27,9 @@
 
     </resultMap>
 
-    <select id="findAllAndMyInfo" parameterType="java.util.Map" resultType="MembershipVO">
+    <select id="findAllOrMyMspList" parameterType="java.util.Map" resultType="MembershipVO">
+        /** MembershipMapper.findAllOrMyMspList */
+
         SELECT A.*
              , CASE WHEN B.MSP_ID IS NOT NULL THEN 'Y' ELSE 'N' END AS JOIN_YN
           FROM TB_MEMBERSHIP A
@@ -36,6 +38,7 @@
            AND B.STATUS = '1'
            AND A.MSP_ID = B.MSP_ID
          WHERE 1=1
+           AND A.STATUS = '1'
          <if test='joinYn != null and joinYn.equals("Y")'>
              AND B.ACCOUNT_ID = #{accountId}
              AND B.STATUS = '1'

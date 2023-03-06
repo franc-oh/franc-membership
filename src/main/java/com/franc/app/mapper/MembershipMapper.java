@@ -9,6 +9,6 @@ import java.util.Map;
 @Mapper
 public interface MembershipMapper {
 
-    List<MembershipVO> findAllAndMyInfo(Map<String, Object> paramMap) throws Exception;
+    List<MembershipVO> findAllOrMyMspList(Map<String, Object> paramMap) throws Exception;
 
 }

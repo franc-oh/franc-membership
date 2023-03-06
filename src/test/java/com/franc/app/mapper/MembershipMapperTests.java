@@ -42,7 +42,7 @@ public class MembershipMapperTests {
         paramMap.put("joinYn", joinYn);
 
         // # 2. When
-        List<MembershipVO> list = membershipMapper.findAllAndMyInfo(paramMap);
+        List<MembershipVO> list = membershipMapper.findAllOrMyMspList(paramMap);
 
         // # 3. Then
         assertThat(list.size()).isEqualTo(2);
@@ -61,7 +61,7 @@ public class MembershipMapperTests {
         paramMap.put("joinYn", joinYn);
 
         // # 2. When
-        List<MembershipVO> list = membershipMapper.findAllAndMyInfo(paramMap);
+        List<MembershipVO> list = membershipMapper.findAllOrMyMspList(paramMap);
 
         // # 3. Then
         assertThat(list).isNotEmpty();
@@ -87,7 +87,7 @@ public class MembershipMapperTests {
         paramMap.put("limit", limit);
 
         // # 2. When
-        List<MembershipVO> list = membershipMapper.findAllAndMyInfo(paramMap);
+        List<MembershipVO> list = membershipMapper.findAllOrMyMspList(paramMap);
 
         // # 3. Then
         assertThat(list).isEmpty();
