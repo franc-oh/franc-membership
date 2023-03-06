@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.franc.app.mapper.MembershipMapper">
+
+    <resultMap id="mspAndMyMspInfoMap" type="MspAndMyMspInfoVO">
+        <id property="mspId" column="MSP_ID" javaType="string" />
+        <result property="mspNm" column="MSP_NM" javaType="string" />
+        <result property="status" column="STATUS" javaType="java.lang.Character" />
+        <result property="mspInfo" column="MSP_INFO" javaType="string" />
+        <result property="mspImgUrl" column="MSP_IMG_URL" javaType="string" />
+        <result property="homepageUrl" column="HOMEPAGE_URL" javaType="string" />
+        <result property="activeMonths" column="ACTIVE_MONTHS" javaType="int" />
+        <result property="bigo" column="BIGO" javaType="string" />
+        <result property="mspJoinYn" column="MSP_JOIN_YN" javaType="string" />
+        <association property="mspJoinInfo" javaType="MyMembershipVO">
+            <result property="accountId" column="ACCOUNT_ID" javaType="java.lang.Long" />
+            <result property="mspId" column="MSP_ID" javaType="string" />
+            <result property="status" column="STATUS" javaType="java.lang.Character" />
+            <result property="totalAccumPoint" column="TOTAL_ACCUM_POINT" javaType="int" />
+            <result property="mspGradeCd" column="MSP_GRADE_CD" javaType="string" />
+            <result property="insertDate" column="INSERT_DATE" javaType="java.time.LocalDateTime" />
+            <result property="withdrawalDate" column="WITHDRAWAL_DATE" javaType="java.time.LocalDateTime" />
+            <result property="barCd" column="BAR_CD" javaType="string" />
+        </association>
+
+    </resultMap>
+
+    <select id="findAllAndMyInfo" parameterType="java.util.Map" resultType="MembershipVO">
+        SELECT A.*
+             , CASE WHEN B.MSP_ID IS NOT NULL THEN 'Y' ELSE 'N' END AS JOIN_YN
+          FROM TB_MEMBERSHIP A
+          LEFT OUTER JOIN TB_MY_MEMBERSHIP B
+            ON B.ACCOUNT_ID = #{accountId}
+           AND B.STATUS = '1'
+           AND A.MSP_ID = B.MSP_ID
+         WHERE 1=1
+         <if test='joinYn != null and joinYn.equals("Y")'>
+             AND B.ACCOUNT_ID = #{accountId}
+             AND B.STATUS = '1'
+         </if>
+         ORDER BY A.MSP_ID
+         LIMIT NVL(#{offset}, 0), NVL(#{limit}, 20)
+    </select>
+
+
+</mapper>

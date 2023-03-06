@@ -41,7 +41,7 @@ public class MyMembershipMapperTests {
     }
 
     @Test
-    @DisplayName("등록")
+    @DisplayName("멤버십_등록")
     public void save() throws Exception {
         // # Given
         String barcode = createBarcode();
@@ -71,7 +71,6 @@ public class MyMembershipMapperTests {
         assertThat(myMembership.getStatus()).isEqualTo('1');
     }
 
-
     public String createBarcode() throws Exception {
         StringBuilder barcode = new StringBuilder();
         barcode.append(DateUtil.nowDateToString());
@@ -79,4 +78,5 @@ public class MyMembershipMapperTests {
 
         return barcode.toString();
     }
+
 }
