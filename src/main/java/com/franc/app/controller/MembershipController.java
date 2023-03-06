@@ -1,5 +1,8 @@
 package com.franc.app.controller;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.franc.app.code.Code;
 import com.franc.app.dto.MembershipFindAllRequestDTO;
 import com.franc.app.dto.MembershipFindAllResponseDTO;
@@ -35,6 +38,8 @@ public class MembershipController {
 
     private final AccountService accountService;
 
+    private final ObjectMapper objectMapper;
+
     private final ModelMapper modelMapper;
 
     @GetMapping("/all")
@@ -47,22 +52,24 @@ public class MembershipController {
         AccountVO accountVO = accountService.getInfoAndCheckStatus(request.getAccountId());
 
         // #2. 조회
-        Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("accountId", request.getAccountId());
-        paramMap.put("joinYn", request.getJoinYn());
-        paramMap.put("pageNo", request.getPageNo());
-        paramMap.put("pageLimit", request.getPageLimit());
-        List<MembershipVO> membershipList = membershipService.findAllOrMyMspList(paramMap);
+        MembershipVO listParam = new MembershipVO();
+        modelMapper.map(request, listParam);
+        List<MembershipVO> membershipList = membershipService.findAllOrMyMspList(listParam);
 
         // #3. 응답
         response.setResultCode(Code.RESPONSE_CODE_SUCCESS);
         response.setResultMessage(Code.RESPONSE_MESSAGE_SUCCESS);
-        response.setMembershipCnt(membershipList.size());
-        response.setMembershipList(modelMapper.map(membershipList, new TypeToken<List<MembershipFindAllResponseDTO.MembershipInfo>>() {}.getType()));
+
+        if(!membershipList.isEmpty()) {
+            response.setMembershipCnt(membershipList.size());
+            response.setMembershipList(objectMapper.convertValue(membershipList,
+                    TypeFactory.defaultInstance().constructCollectionType(List.class, MembershipFindAllResponseDTO.MembershipInfo.class)
+            ));
+        }
 
         logger.info("멤버십_전체조회_Response => {}", response.toString());
 
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 }

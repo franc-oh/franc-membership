@@ -19,7 +19,7 @@ public class MembershipFindAllResponseDTO {
 
 
     @Data
-    public class MembershipInfo {
+    public static class MembershipInfo {
         private String mspId;
         private String mspNm;
         private String mspInfo;

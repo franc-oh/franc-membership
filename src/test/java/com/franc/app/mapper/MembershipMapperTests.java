@@ -10,9 +10,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,12 +35,11 @@ public class MembershipMapperTests {
         // # 1. Given
         String joinYn = "";
 
-        Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("accountId", accountId);
-        paramMap.put("joinYn", joinYn);
-
         // # 2. When
-        List<MembershipVO> list = membershipMapper.findAllOrMyMspList(paramMap);
+        List<MembershipVO> list = membershipMapper.findAllOrMyMspList(MembershipVO.builder()
+                .accountId(accountId)
+                .joinYn(joinYn)
+                .build());
 
         // # 3. Then
         assertThat(list.size()).isEqualTo(2);
@@ -56,12 +53,11 @@ public class MembershipMapperTests {
 
         insertMyMembership(accountId, mspId); // 1건 등록
 
-        Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("accountId", accountId);
-        paramMap.put("joinYn", joinYn);
-
         // # 2. When
-        List<MembershipVO> list = membershipMapper.findAllOrMyMspList(paramMap);
+        List<MembershipVO> list = membershipMapper.findAllOrMyMspList(MembershipVO.builder()
+                .accountId(accountId)
+                .joinYn(joinYn)
+                .build());
 
         // # 3. Then
         assertThat(list).isNotEmpty();
@@ -75,19 +71,22 @@ public class MembershipMapperTests {
     @DisplayName("멤버십_전체조회_나의정보포함_페이징")
     public void findAllAndMyInfo_paging() throws Exception {
         // # 1. Given
+        String joinYn = "";
         int page_no = 2;
         int page_limit = 20;
         int offset = Math.abs(page_no -1) * page_limit;
         int limit = page_limit;
 
-        Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("accountId", accountId);
-        paramMap.put("joinYn", "");
-        paramMap.put("offset", offset);
-        paramMap.put("limit", limit);
+        MembershipVO paramVo = MembershipVO.builder()
+                .accountId(accountId)
+                .joinYn(joinYn)
+                .pageNo(page_no)
+                .pageLimit(page_limit)
+                .build();
+        paramVo.setPaging();
 
         // # 2. When
-        List<MembershipVO> list = membershipMapper.findAllOrMyMspList(paramMap);
+        List<MembershipVO> list = membershipMapper.findAllOrMyMspList(paramVo);
 
         // # 3. Then
         assertThat(list).isEmpty();

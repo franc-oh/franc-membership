@@ -1,17 +1,18 @@
 package com.franc.app.vo;
 
 import com.franc.app.code.Code;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import com.franc.app.util.PageUtil;
+import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
-@Getter
+@Getter @Setter
 @ToString
 @EqualsAndHashCode(of = {"mspId"})
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class MembershipVO {
 
     private String mspId;
@@ -28,8 +29,19 @@ public class MembershipVO {
     private String updateUser;
 
 
-    // 조회 관련 필드
+    // 조회 인자
     private String joinYn;
+    private Long accountId;
+    private Integer pageNo;
+    private Integer pageLimit;
+
+    private Integer offset = 0;
+    private Integer limit = 20;
 
 
+    public void setPaging() throws Exception {
+        Map<String, Integer> pageMap = PageUtil.getPageMap(pageNo, pageLimit);
+        offset = pageMap.get("offset");
+        limit = pageMap.get("limit");
+    }
 }
