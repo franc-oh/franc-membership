@@ -14,6 +14,9 @@ public enum ExceptionResult {
     NOT_ACTIVE_ACCOUNT(HttpStatus.BAD_REQUEST, "해당 회원은 현재 정지(탈퇴) 상태 입니다."),
     NOT_FOUND_ACCOUNT(HttpStatus.BAD_REQUEST, "존재하지 않는 회원입니다."),
     NOT_FOUND_MSP_INFO(HttpStatus.BAD_REQUEST, "해당 멤버십은 존재하지 않습니다."),
+    NOT_JOIN_MEMBERSHIP(HttpStatus.BAD_REQUEST, "가입하지 않은 멤버십입니다."),
+    ALREADY_WITHDRAWAL_MEMBERSHIP(HttpStatus.BAD_REQUEST, "이미 탈퇴한 멤버십입니다."),
+
 
     PARAMETER_NOT_VALID(HttpStatus.BAD_REQUEST, "잘못된 요청 데이터입니다."),
     UNKNOWN_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "오류가 발생했습니다. <br/>고객센터(1588-9999)로 문의주세요.");

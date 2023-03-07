@@ -13,5 +13,7 @@ public interface MyMembershipMapper {
 
     void rejoin(MyMembershipVO vo) throws Exception;
 
+    void withdrawal(MyMembershipVO vo) throws Exception;
+
     MyMembershipVO findById(Map<String, Object> paramMap) throws Exception;
 }

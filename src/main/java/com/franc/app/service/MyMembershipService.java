@@ -93,5 +93,27 @@ public class MyMembershipService {
 
     }
 
+    public void withdrawal(MyMembershipVO paramVO) throws Exception {
+        logger.info("My Membership Withdrawal Start : " + paramVO.toString());
+
+        // #1. 해당 ID로 등록된 멤버십 가져오기
+        Map<String, Object> myMembershipIdMap = new HashMap<>();
+        myMembershipIdMap.put("accountId", paramVO.getAccountId());
+        myMembershipIdMap.put("mspId", paramVO.getMspId());
+        MyMembershipVO myMembershipVo = myMembershipMapper.findById(myMembershipIdMap);
+
+        // #2. 멤버십 탈퇴가능여부 검증
+        if(myMembershipVo == null) {
+            throw new BizException(ExceptionResult.NOT_JOIN_MEMBERSHIP);
+        }
+        if(Code.STATUS_WITHDRAWAL == myMembershipVo.getStatus() || myMembershipVo.getWithdrawalDate() != null) {
+            throw new BizException(ExceptionResult.ALREADY_WITHDRAWAL_MEMBERSHIP);
+        }
+
+        myMembershipMapper.withdrawal(paramVO);
+
+        logger.info("My Membership Withdrawal Success!!");
+    }
+
 
 }

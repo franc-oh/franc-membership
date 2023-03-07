@@ -143,6 +143,67 @@ public class MyMembershipServiceTests {
 
     }
 
+
+    @Test
+    @DisplayName("탈퇴_실패_미가입")
+    public void withdrawal_fail_not_join() throws Exception {
+        // # Given
+        MyMembershipVO vo = buildVo(accountId, mspId, Code.STATUS_WITHDRAWAL,
+                0, Code.MEMBERSHIP_GRADE_COMMON, "20230304173630000001", LocalDateTime.now().minusDays(1));
+
+        when(myMembershipMapper.findById(any(HashMap.class)))
+                .thenReturn(null);
+
+        // # When
+        BizException exception =
+                assertThrows(BizException.class, () -> myMembershipService.withdrawal(vo));
+
+        // # Then
+        assertThat(exception.getClass()).isEqualTo(BizException.class);
+        assertThat(exception.getResult()).isEqualTo(ExceptionResult.NOT_JOIN_MEMBERSHIP);
+    }
+
+    @Test
+    @DisplayName("탈퇴_실패_이미탈퇴")
+    public void withdrawal_fail_already() throws Exception {
+        // # Given
+        MyMembershipVO vo = buildVo(accountId, mspId, Code.STATUS_WITHDRAWAL,
+                0, Code.MEMBERSHIP_GRADE_COMMON, "20230304173630000001", LocalDateTime.now().minusDays(1));
+
+        when(myMembershipMapper.findById(any(HashMap.class)))
+                .thenReturn(vo);
+
+        // # When
+        BizException exception =
+                assertThrows(BizException.class, () -> myMembershipService.withdrawal(vo));
+
+        // # Then
+        assertThat(exception.getClass()).isEqualTo(BizException.class);
+        assertThat(exception.getResult()).isEqualTo(ExceptionResult.ALREADY_WITHDRAWAL_MEMBERSHIP);
+    }
+
+    @Test
+    @DisplayName("탈퇴_성공")
+    public void withdrawal_success() throws Exception {
+        // # Given
+        MyMembershipVO vo = buildVo(accountId, mspId, Code.STATUS_USE,
+                0, Code.MEMBERSHIP_GRADE_COMMON, "20230304173630000001", null);
+
+        when(myMembershipMapper.findById(any(HashMap.class)))
+                .thenReturn(vo);
+
+        doNothing().when(myMembershipMapper)
+                .withdrawal(any(MyMembershipVO.class));
+
+        // # When
+        myMembershipService.withdrawal(vo);
+
+        // # Then
+        verify(myMembershipMapper, times(1)).findById(any(HashMap.class));
+        verify(myMembershipMapper, times(1)).withdrawal(any(MyMembershipVO.class));
+    }
+
+
     public MyMembershipVO buildVo(Long accountId, String mspId, Character status,
                                   Integer totalAccumPoint, String mspGradeCd, String barCd, LocalDateTime withdrawalDate) {
         return MyMembershipVO.builder()

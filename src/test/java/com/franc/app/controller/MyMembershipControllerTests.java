@@ -1,8 +1,10 @@
 package com.franc.app.controller;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.franc.app.code.Code;
 import com.franc.app.dto.MyMembershipJoinRequestDTO;
+import com.franc.app.dto.MyMembershipWithdrawalRequestDTO;
 import com.franc.app.exception.BizException;
 import com.franc.app.exception.ExceptionResult;
 import com.franc.app.exception.ControllerExceptionHandler;
@@ -19,7 +21,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -48,8 +52,13 @@ public class MyMembershipControllerTests {
     @Mock
     private AccountService accountService;
 
-    private MockMvc mockMvc;
+    @Spy
+    private ModelMapper modelMapper;
+
+    @Spy
     private ObjectMapper objectMapper;
+
+    private MockMvc mockMvc;
 
     @BeforeEach
     public void init() {
@@ -57,10 +66,10 @@ public class MyMembershipControllerTests {
                 .setControllerAdvice(ControllerExceptionHandler.class)
                 .build();
 
-        objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
-    private static final String JOIN_URL = "/api/msp/my_membership";
+    private static final String URL = "/api/msp/my_membership";
 
     @ParameterizedTest
     @MethodSource("join_fail_valid_params")
@@ -70,7 +79,7 @@ public class MyMembershipControllerTests {
 
         // # 2. When
         ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.post(JOIN_URL)
+                MockMvcRequestBuilders.post(URL)
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
                         .accept(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
                         .content(objectMapper.writeValueAsString(requestDTO))
@@ -107,7 +116,7 @@ public class MyMembershipControllerTests {
 
         // # 2. When
         ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.post(JOIN_URL)
+                MockMvcRequestBuilders.post(URL)
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
                         .accept(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
                         .content(objectMapper.writeValueAsString(requestDTO))
@@ -137,7 +146,7 @@ public class MyMembershipControllerTests {
 
         // # 2. When
         ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.post(JOIN_URL)
+                MockMvcRequestBuilders.post(URL)
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
                         .accept(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
                         .content(objectMapper.writeValueAsString(requestDTO))
@@ -167,7 +176,7 @@ public class MyMembershipControllerTests {
 
         // # 2. When
         ResultActions resultActions = mockMvc.perform(
-                MockMvcRequestBuilders.post(JOIN_URL)
+                MockMvcRequestBuilders.post(URL)
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
                         .accept(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
                         .content(objectMapper.writeValueAsString(requestDTO))
@@ -182,6 +191,116 @@ public class MyMembershipControllerTests {
         verify(myMembershipService, times(1)).save(any(MyMembershipVO.class));
     }
 
+    @Test
+    @DisplayName("멤버십탈퇴_실패_필수값_안들어옴")
+    public void withdrawal_fail_valid() throws Exception {
+        // # 1. Given
+        MyMembershipWithdrawalRequestDTO requestDTO = MyMembershipWithdrawalRequestDTO.builder().build();
+
+        // # 2. When
+        ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.delete(URL)
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+                        .accept(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+                        .content(objectMapper.writeValueAsString(requestDTO))
+        ).andDo(print());
+
+
+        // # 3. Then
+        resultActions.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("resultCode").value(ExceptionResult.PARAMETER_NOT_VALID.getCode().value()))
+                .andExpect(jsonPath("resultMessage").value(ExceptionResult.PARAMETER_NOT_VALID.getMessage()));
+    }
+
+    @Test
+    @DisplayName("멤버십탈퇴_실패_회원정보_에러")
+    public void withdrawal_fail_account_err() throws Exception {
+        // # 1. Given
+        Long accountId = 6L;
+        MyMembershipWithdrawalRequestDTO requestDTO = MyMembershipWithdrawalRequestDTO.builder()
+                .accountId(accountId)
+                .mspId("12345")
+                .build();
+
+        when(accountService.getInfoAndCheckStatus(anyLong()))
+                .thenThrow(new BizException(ExceptionResult.NOT_FOUND_ACCOUNT));
+
+        // # 2. When
+        ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.delete(URL)
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+                        .accept(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+                        .content(objectMapper.writeValueAsString(requestDTO))
+        ).andDo(print());
+
+        // # 3. Then
+        resultActions.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("resultCode").value(ExceptionResult.NOT_FOUND_ACCOUNT.getCode().value()))
+                .andExpect(jsonPath("resultMessage").value(ExceptionResult.NOT_FOUND_ACCOUNT.getMessage()));
+    }
+
+    @Test
+    @DisplayName("멤버십탈퇴_실패_이미탈퇴")
+    public void withdrawal_fail_already() throws Exception {
+        // # 1. Given
+        Long accountId = 6L;
+        MyMembershipWithdrawalRequestDTO requestDTO = MyMembershipWithdrawalRequestDTO.builder()
+                .accountId(accountId)
+                .mspId("12345")
+                .build();
+
+        when(accountService.getInfoAndCheckStatus(anyLong()))
+                .thenReturn(AccountVO.builder().build());
+
+        doThrow(new BizException(ExceptionResult.ALREADY_WITHDRAWAL_MEMBERSHIP))
+                .when(myMembershipService).withdrawal(any(MyMembershipVO.class));
+
+        // # 2. When
+        ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.delete(URL)
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+                        .accept(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+                        .content(objectMapper.writeValueAsString(requestDTO))
+        ).andDo(print());
+
+        // # 3. Then
+        resultActions.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("resultCode").value(ExceptionResult.ALREADY_WITHDRAWAL_MEMBERSHIP.getCode().value()))
+                .andExpect(jsonPath("resultMessage").value(ExceptionResult.ALREADY_WITHDRAWAL_MEMBERSHIP.getMessage()));
+    }
+
+    @Test
+    @DisplayName("멤버십탈퇴_성공")
+    public void withdrawal_success() throws Exception {
+        // # 1. Given
+        Long accountId = 5L;
+        MyMembershipJoinRequestDTO requestDTO = MyMembershipJoinRequestDTO.builder()
+                .accountId(accountId)
+                .mspId("12345")
+                .build();
+
+        when(accountService.getInfoAndCheckStatus(anyLong()))
+                .thenReturn(AccountVO.builder().build());
+
+        doNothing().when(myMembershipService).withdrawal(any(MyMembershipVO.class));
+
+
+        // # 2. When
+        ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.delete(URL)
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+                        .accept(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+                        .content(objectMapper.writeValueAsString(requestDTO))
+        ).andDo(print());
+
+        // # 3. Then
+        resultActions.andExpect(status().isOk())
+                .andExpect(jsonPath("resultCode").value(Code.RESPONSE_CODE_SUCCESS))
+                .andExpect(jsonPath("resultMessage").value(Code.RESPONSE_MESSAGE_SUCCESS));
+
+        verify(accountService, times(1)).getInfoAndCheckStatus(anyLong());
+        verify(myMembershipService, times(1)).withdrawal(any(MyMembershipVO.class));
+    }
 
 }
 

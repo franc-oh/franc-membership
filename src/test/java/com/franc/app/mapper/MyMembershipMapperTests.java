@@ -1,5 +1,6 @@
 package com.franc.app.mapper;
 
+import com.franc.app.code.Code;
 import com.franc.app.util.DateUtil;
 import com.franc.app.vo.MyMembershipVO;
 import org.junit.jupiter.api.DisplayName;
@@ -70,6 +71,37 @@ public class MyMembershipMapperTests {
         assertThat(myMembership.getBarCd()).isEqualTo(barcode);
         assertThat(myMembership.getStatus()).isEqualTo('1');
     }
+
+    @Test
+    @DisplayName("멤버십탈퇴")
+    public void withdrawal() throws Exception {
+        // # 1. Given
+        MyMembershipVO myMembershipVO = MyMembershipVO.builder()
+                .accountId(accountId)
+                .mspId(mspId)
+                .barCd(createBarcode())
+                .build();
+
+        myMembershipMapper.save(myMembershipVO);
+
+        // # 2. When
+        myMembershipMapper.withdrawal(myMembershipVO);
+
+        // findById
+        Map<String, Object> findByIdParamMap = new HashMap<>();
+        findByIdParamMap.put("accountId", accountId);
+        findByIdParamMap.put("mspId", mspId);
+        MyMembershipVO myMembership = myMembershipMapper.findById(findByIdParamMap);
+
+        // # 3. then
+        assertThat(myMembership).isNotNull();
+        assertThat(myMembership.getAccountId()).isEqualTo(accountId);
+        assertThat(myMembership.getMspId()).isEqualTo(mspId);
+        assertThat(myMembership.getStatus()).isEqualTo(Code.STATUS_WITHDRAWAL);
+        assertThat(myMembership.getWithdrawalDate()).isNotNull();
+
+    }
+
 
     public String createBarcode() throws Exception {
         StringBuilder barcode = new StringBuilder();

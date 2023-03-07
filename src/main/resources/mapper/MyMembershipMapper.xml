@@ -33,6 +33,15 @@
            AND MSP_ID = #{mspId}
     </update>
 
+    <update id="withdrawal" parameterType="MyMembershipVo">
+        /** MyMembershipMapper.withdrawal */
+        UPDATE TB_MY_MEMBERSHIP
+        SET STATUS = '0'
+        , WITHDRAWAL_DATE = NOW()
+        WHERE ACCOUNT_ID = #{accountId}
+        AND MSP_ID = #{mspId}
+    </update>
+
     <select id="findById" parameterType="java.util.Map" resultType="MyMembershipVo">
         SELECT A.*
           FROM TB_MY_MEMBERSHIP A
