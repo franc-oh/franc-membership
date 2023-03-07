@@ -2,6 +2,7 @@ package com.franc.app.mapper;
 
 import com.franc.app.vo.MyMembershipVO;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.Map;
 
@@ -16,4 +17,6 @@ public interface MyMembershipMapper {
     void withdrawal(MyMembershipVO vo) throws Exception;
 
     MyMembershipVO findById(Map<String, Object> paramMap) throws Exception;
+
+    MyMembershipVO findByBarCd(@Param("barCd") String barCd) throws Exception;
 }

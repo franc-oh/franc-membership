@@ -103,6 +103,38 @@ public class MyMembershipMapperTests {
     }
 
 
+    /**
+     * 가맹점조회 및 체크
+     * 현재 등급에 따른 멤버십 정책가져오기
+     * 혜택저장 (INSERT)
+     * 적립총액 계산
+     * 총액에 따른 등급계산
+     * 멤버십 등급 산출 (UPDATE)
+     */
+    @Test
+    @DisplayName("바코드로_나의멤버십조회")
+    public void findByBarCd() throws Exception {
+        // # 1. Given
+        String barCd = createBarcode();
+        MyMembershipVO myMembershipVO = MyMembershipVO.builder()
+                .accountId(accountId)
+                .mspId(mspId)
+                .barCd(barCd)
+                .build();
+
+        myMembershipMapper.save(myMembershipVO);
+
+        // # 2. When
+        MyMembershipVO resultVO = myMembershipMapper.findByBarCd(barCd);
+
+        // # 3. Then
+        assertThat(resultVO).isNotNull();
+        assertThat(resultVO.getAccountId()).isEqualTo(accountId);
+        assertThat(resultVO.getMspId()).isEqualTo(mspId);
+        assertThat(resultVO.getStatus()).isEqualTo(Code.STATUS_USE);
+    }
+
+
     public String createBarcode() throws Exception {
         StringBuilder barcode = new StringBuilder();
         barcode.append(DateUtil.nowDateToString());

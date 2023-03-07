@@ -43,11 +43,20 @@
     </update>
 
     <select id="findById" parameterType="java.util.Map" resultType="MyMembershipVo">
+        /** MyMembershipMapper.findById */
         SELECT A.*
           FROM TB_MY_MEMBERSHIP A
          WHERE 1=1
            AND A.ACCOUNT_ID = #{accountId}
            AND A.MSP_ID = #{mspId}
+    </select>
+
+    <select id="findByBarCd" parameterType="string" resultType="MyMembershipVo">
+        /** MyMembershipMapper.findByBarCd */
+        SELECT A.*
+        FROM TB_MY_MEMBERSHIP A
+        WHERE 1=1
+        AND A.BAR_CD = #{barCd}
     </select>
 
 
