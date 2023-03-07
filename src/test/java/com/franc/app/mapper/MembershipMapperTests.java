@@ -1,6 +1,7 @@
 package com.franc.app.mapper;
 
 import com.franc.app.vo.MembershipVO;
+import com.franc.app.vo.MspAndMyMspInfoVO;
 import com.franc.app.vo.MyMembershipVO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -92,6 +93,65 @@ public class MembershipMapperTests {
         assertThat(list).isEmpty();
         //assertThat(list).isNotEmpty();
         //assertThat(list.size()).isEqualTo(2);
+
+    }
+
+    @Test
+    @DisplayName("멤버십_상세조회_데이터_없을때")
+    public void findByIdAndMyInfo_null() throws Exception {
+        // # 1. Given
+        MspAndMyMspInfoVO paramVo = MspAndMyMspInfoVO.builder()
+                .accountId(accountId)
+                .mspId("1222")
+                .build();
+
+
+        // # 2. When
+        MspAndMyMspInfoVO infoVo = membershipMapper.findByIdAndMyMspInfo(paramVo);
+
+        // # 3. Then
+        assertThat(infoVo).isNull();
+    }
+
+    @Test
+    @DisplayName("멤버십_상세조회_데이터_있음_가입정보_없음")
+    public void findByIdAndMyInfo_success_myMsp_is_null() throws Exception {
+        // # 1. Given
+        MspAndMyMspInfoVO paramVo = MspAndMyMspInfoVO.builder()
+                .accountId(accountId)
+                .mspId(mspId)
+                .build();
+
+        // # 2. When
+        MspAndMyMspInfoVO infoVo = membershipMapper.findByIdAndMyMspInfo(paramVo);
+
+        // # 3. Then
+        assertThat(infoVo).isNotNull();
+        assertThat(infoVo.getMspId()).isEqualTo(mspId);
+        assertThat(infoVo.getMyMspInfo()).isNull();
+        
+    }
+
+    @Test
+    @DisplayName("멤버십_상세조회_데이터_있음_가입정보_있음")
+    public void findByIdAndMyInfo_success_myMsp_is_notNull() throws Exception {
+        // # 1. Given
+        MspAndMyMspInfoVO paramVo = MspAndMyMspInfoVO.builder()
+                .accountId(accountId)
+                .mspId(mspId)
+                .build();
+
+        insertMyMembership(accountId, mspId);
+
+        // # 2. When
+        MspAndMyMspInfoVO infoVo = membershipMapper.findByIdAndMyMspInfo(paramVo);
+
+        // # 3. Then
+        assertThat(infoVo).isNotNull();
+        assertThat(infoVo.getMspId()).isEqualTo(mspId);
+        assertThat(infoVo.getMyMspInfo()).isNotNull();
+        assertThat(infoVo.getMyMspInfo().getAccountId()).isEqualTo(accountId);
+        assertThat(infoVo.getMyMspInfo().getBarCd()).isNotNull();
 
     }
 

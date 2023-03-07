@@ -6,10 +6,16 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.franc.app.code.Code;
 import com.franc.app.dto.MembershipFindAllRequestDTO;
 import com.franc.app.dto.MembershipFindAllResponseDTO;
+import com.franc.app.dto.MembershipFindByIdRequestDTO;
+import com.franc.app.dto.MembershipFindByIdResponseDTO;
+import com.franc.app.exception.BizException;
+import com.franc.app.exception.ExceptionResult;
 import com.franc.app.service.AccountService;
 import com.franc.app.service.MembershipService;
 import com.franc.app.vo.AccountVO;
 import com.franc.app.vo.MembershipVO;
+import com.franc.app.vo.MspAndMyMspInfoVO;
+import com.franc.app.vo.MyMembershipVO;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
@@ -69,6 +75,42 @@ public class MembershipController {
 
         logger.info("멤버십_전체조회_Response => {}", response.toString());
 
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+
+    /**
+     * 멤버십 상세조회
+     * @param request
+     * @return
+     * @throws Exception
+     */
+    @GetMapping
+    public ResponseEntity<?> findById(@RequestBody @Valid MembershipFindByIdRequestDTO request) throws Exception {
+        MembershipFindByIdResponseDTO response = new MembershipFindByIdResponseDTO();
+
+        logger.info("멤버십_상세조회_Request => {}", request.toString());
+
+        // #1. 사용자 체크 및 가져오기
+        AccountVO accountVO = accountService.getInfoAndCheckStatus(request.getAccountId());
+
+        // #2. 조회
+        MspAndMyMspInfoVO paramVO = new MspAndMyMspInfoVO();
+        modelMapper.map(request, paramVO);
+        MspAndMyMspInfoVO infoVO = membershipService.findByIdAndMyMspInfo(paramVO);
+        if(infoVO == null)
+            throw new BizException(ExceptionResult.NOT_FOUND_MSP_INFO);
+
+        // #3. 응답
+        response.setResultCode(Code.RESPONSE_CODE_SUCCESS);
+        response.setResultMessage(Code.RESPONSE_MESSAGE_SUCCESS);
+
+        if(infoVO != null) {
+            modelMapper.map(infoVO, response);
+        }
+
+        logger.info("멤버십_상세조회_Response => {}", response.toString());
+        
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 

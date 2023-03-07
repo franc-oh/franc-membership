@@ -4,6 +4,33 @@
 
 <mapper namespace="com.franc.app.mapper.MembershipMapper">
 
+    <sql id="mspJoinMyMsp">
+        FROM TB_MEMBERSHIP A
+        LEFT OUTER JOIN TB_MY_MEMBERSHIP B
+        ON B.ACCOUNT_ID = #{accountId}
+        AND B.STATUS = '1'
+        AND A.MSP_ID = B.MSP_ID
+
+    </sql>
+
+
+    <select id="findAllOrMyMspList" parameterType="MembershipVO" resultType="MembershipVO">
+        /** MembershipMapper.findAllOrMyMspList */
+
+        SELECT A.*
+             , CASE WHEN B.MSP_ID IS NOT NULL THEN 'Y' ELSE 'N' END AS JOIN_YN
+          <include refid="mspJoinMyMsp" />
+         WHERE 1=1
+           AND A.STATUS = '1'
+         <if test='joinYn != null and joinYn.equals("Y")'>
+             AND B.ACCOUNT_ID = #{accountId}
+         </if>
+         ORDER BY A.MSP_ID
+         LIMIT NVL(#{offset}, 0), NVL(#{limit}, 20)
+    </select>
+
+
+
     <resultMap id="mspAndMyMspInfoMap" type="MspAndMyMspInfoVO">
         <id property="mspId" column="MSP_ID" javaType="string" />
         <result property="mspNm" column="MSP_NM" javaType="string" />
@@ -13,39 +40,35 @@
         <result property="homepageUrl" column="HOMEPAGE_URL" javaType="string" />
         <result property="activeMonths" column="ACTIVE_MONTHS" javaType="int" />
         <result property="bigo" column="BIGO" javaType="string" />
-        <result property="mspJoinYn" column="MSP_JOIN_YN" javaType="string" />
-        <association property="mspJoinInfo" javaType="MyMembershipVO">
-            <result property="accountId" column="ACCOUNT_ID" javaType="java.lang.Long" />
-            <result property="mspId" column="MSP_ID" javaType="string" />
-            <result property="status" column="STATUS" javaType="java.lang.Character" />
-            <result property="totalAccumPoint" column="TOTAL_ACCUM_POINT" javaType="int" />
-            <result property="mspGradeCd" column="MSP_GRADE_CD" javaType="string" />
-            <result property="insertDate" column="INSERT_DATE" javaType="java.time.LocalDateTime" />
-            <result property="withdrawalDate" column="WITHDRAWAL_DATE" javaType="java.time.LocalDateTime" />
-            <result property="barCd" column="BAR_CD" javaType="string" />
+        <result property="joinYn" column="JOIN_YN" javaType="string" />
+        <association property="myMspInfo" javaType="MyMembershipVO">
+            <result property="accountId" column="MY_ACCOUNT_ID" javaType="java.lang.Long" />
+            <result property="mspId" column="MY_MSP_ID" javaType="string" />
+            <result property="status" column="MY_STATUS" javaType="java.lang.Character" />
+            <result property="totalAccumPoint" column="MY_TOTAL_ACCUM_POINT" javaType="int" />
+            <result property="mspGradeCd" column="MY_MSP_GRADE_CD" javaType="string" />
+            <result property="insertDate" column="MY_INSERT_DATE" javaType="java.time.LocalDateTime" />
+            <result property="withdrawalDate" column="MY_WITHDRAWAL_DATE" javaType="java.time.LocalDateTime" />
+            <result property="barCd" column="MY_BAR_CD" javaType="string" />
         </association>
-
     </resultMap>
 
-    <select id="findAllOrMyMspList" parameterType="java.util.Map" resultType="MembershipVO">
-        /** MembershipMapper.findAllOrMyMspList */
-
+    <select id="findByIdAndMyMspInfo" parameterType="MspAndMyMspInfoVO" resultMap="mspAndMyMspInfoMap">
+        /** MembershipMapper.findByIdAndMyMspInfo */
         SELECT A.*
              , CASE WHEN B.MSP_ID IS NOT NULL THEN 'Y' ELSE 'N' END AS JOIN_YN
-          FROM TB_MEMBERSHIP A
-          LEFT OUTER JOIN TB_MY_MEMBERSHIP B
-            ON B.ACCOUNT_ID = #{accountId}
-           AND B.STATUS = '1'
-           AND A.MSP_ID = B.MSP_ID
+             , B.ACCOUNT_ID AS MY_ACCOUNT_ID
+             , B.MSP_ID AS MY_MSP_ID
+             , B.STATUS AS MY_STATUS
+             , B.TOTAL_ACCUM_POINT AS MY_TOTAL_ACCUM_POINT
+             , B.MSP_GRADE_CD AS MY_MSP_GRAGE_CD
+             , B.INSERT_DATE AS MY_INSERT_DATE
+             , B.WITHDRAWAL_DATE AS MY_WITHDRAWAL_DATE
+             , B.BAR_CD AS MY_BAR_CD
+        <include refid="mspJoinMyMsp" />
          WHERE 1=1
-           AND A.STATUS = '1'
-         <if test='joinYn != null and joinYn.equals("Y")'>
-             AND B.ACCOUNT_ID = #{accountId}
-             AND B.STATUS = '1'
-         </if>
-         ORDER BY A.MSP_ID
-         LIMIT NVL(#{offset}, 0), NVL(#{limit}, 20)
-    </select>
+           AND A.MSP_ID = #{mspId}
 
+    </select>
 
 </mapper>

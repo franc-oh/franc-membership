@@ -3,6 +3,7 @@ package com.franc.app.vo;
 import com.franc.app.code.Code;
 import com.franc.app.util.PageUtil;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -12,7 +13,7 @@ import java.util.Map;
 @EqualsAndHashCode(of = {"mspId"})
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 public class MembershipVO {
 
     private String mspId;
