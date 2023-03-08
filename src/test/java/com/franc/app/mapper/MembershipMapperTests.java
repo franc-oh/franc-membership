@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -48,6 +49,7 @@ public class MembershipMapperTests {
 
     @Test
     @DisplayName("멤버십_전체조회_나의정보포함_필터링")
+    @Transactional
     public void findAllAndMyInfo_filtering() throws Exception {
         // # 1. Given
         String joinYn = "Y";
@@ -134,6 +136,7 @@ public class MembershipMapperTests {
 
     @Test
     @DisplayName("멤버십_상세조회_데이터_있음_가입정보_있음")
+    @Transactional
     public void findByIdAndMyInfo_success_myMsp_is_notNull() throws Exception {
         // # 1. Given
         MspAndMyMspInfoVO paramVo = MspAndMyMspInfoVO.builder()

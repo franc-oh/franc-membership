@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,6 +44,7 @@ public class MyMembershipMapperTests {
 
     @Test
     @DisplayName("멤버십_등록")
+    @Transactional
     public void save() throws Exception {
         // # Given
         String barcode = createBarcode();
@@ -74,6 +76,7 @@ public class MyMembershipMapperTests {
 
     @Test
     @DisplayName("멤버십탈퇴")
+    @Transactional
     public void withdrawal() throws Exception {
         // # 1. Given
         MyMembershipVO myMembershipVO = MyMembershipVO.builder()
@@ -104,18 +107,20 @@ public class MyMembershipMapperTests {
 
 
     /**
-     * 가맹점조회 및 체크
-     * 현재 등급에 따른 멤버십 정책가져오기
+     * 내 멤버십 + 가맹점정보 + 현재 등급에 따른 멤버십 정책
      * 혜택저장 (INSERT)
      * 적립총액 계산
      * 총액에 따른 등급계산
      * 멤버십 등급 산출 (UPDATE)
      */
     @Test
-    @DisplayName("바코드로_나의멤버십조회")
-    public void findByBarCd() throws Exception {
+    @DisplayName("바코드로_멤버십상세조회")
+    @Transactional
+    public void findDetailByBarCd() throws Exception {
         // # 1. Given
         String barCd = createBarcode();
+        String franchiseeId = "F230228000002";
+
         MyMembershipVO myMembershipVO = MyMembershipVO.builder()
                 .accountId(accountId)
                 .mspId(mspId)
@@ -125,7 +130,7 @@ public class MyMembershipMapperTests {
         myMembershipMapper.save(myMembershipVO);
 
         // # 2. When
-        MyMembershipVO resultVO = myMembershipMapper.findByBarCd(barCd);
+        MyMembershipVO resultVO = myMembershipMapper.findDetailByBarCdAndFranchiseeId(barCd, franchiseeId);
 
         // # 3. Then
         assertThat(resultVO).isNotNull();

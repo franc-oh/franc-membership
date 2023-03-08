@@ -18,11 +18,15 @@ public class MembershipVO {
 
     private String mspId;
     private String mspNm;
+
+    @Builder.Default
     private Character status = Code.STATUS_USE;
     private String mspInfo;
     private String mspImgUrl;
     private String homepageUrl;
-    private Integer activeMonths = 3;
+
+    @Builder.Default
+    private Integer activeMonths = Code.MEMBERSHIP_ACTIVE_MONTHS;
     private String bigo;
     private LocalDateTime insertDate;
     private String insertUser;
@@ -36,7 +40,10 @@ public class MembershipVO {
     private Integer pageNo;
     private Integer pageLimit;
 
+    @Builder.Default
     private Integer offset = 0;
+
+    @Builder.Default
     private Integer limit = 20;
 
 

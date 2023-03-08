@@ -2,6 +2,7 @@ package com.franc.app.vo;
 
 import com.franc.app.code.Code;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 
@@ -9,12 +10,20 @@ import java.time.LocalDateTime;
 @ToString
 @EqualsAndHashCode(of = {"accountId", "mspId"})
 @NoArgsConstructor
+@AllArgsConstructor
+@SuperBuilder
 public class MyMembershipVO {
 
     private Long accountId;
     private String mspId;
+
+    @Builder.Default
     private Character status = Code.STATUS_USE;
+
+    @Builder.Default
     private Integer totalAccumPoint = 0;
+
+    @Builder.Default
     private String mspGradeCd = Code.MEMBERSHIP_GRADE_COMMON;
     private LocalDateTime insertDate;
     private LocalDateTime withdrawalDate;
@@ -25,24 +34,4 @@ public class MyMembershipVO {
         this.barCd = barCd;
     }
 
-    @Builder
-    public MyMembershipVO(Long accountId, String mspId, Character status, Integer totalAccumPoint, String mspGradeCd, String barCd, LocalDateTime withdrawalDate) {
-        this.accountId = accountId;
-        this.mspId = mspId;
-
-        if(status != null)
-            this.status = status;
-
-        if(totalAccumPoint != null)
-            this.totalAccumPoint = totalAccumPoint;
-
-        if(mspGradeCd != null)
-            this.mspGradeCd = mspGradeCd;
-
-        if(barCd != null)
-            this.barCd = barCd;
-
-        if(withdrawalDate != null)
-            this.withdrawalDate = withdrawalDate;
-    }
 }

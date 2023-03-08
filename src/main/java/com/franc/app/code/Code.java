@@ -18,4 +18,6 @@ public class Code {
     public static final String MEMBERSHIP_GRADE_GOLD = "GOLD";
     public static final String MEMBERSHIP_GRADE_VIP = "VIP";
 
+    public static final int MEMBERSHIP_ACTIVE_MONTHS = 3;
+
 }

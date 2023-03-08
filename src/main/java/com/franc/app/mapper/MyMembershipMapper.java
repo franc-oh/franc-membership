@@ -18,5 +18,5 @@ public interface MyMembershipMapper {
 
     MyMembershipVO findById(Map<String, Object> paramMap) throws Exception;
 
-    MyMembershipVO findByBarCd(@Param("barCd") String barCd) throws Exception;
+    MyMembershipVO findDetailByBarCdAndFranchiseeId(@Param("barCd") String barCd, @Param("franchiseeId") String franchiseeId) throws Exception;
 }

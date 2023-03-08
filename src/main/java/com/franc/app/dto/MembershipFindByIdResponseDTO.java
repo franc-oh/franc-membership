@@ -18,11 +18,12 @@ public class MembershipFindByIdResponseDTO {
 
     private String mspId;
     private String mspNm;
-    private Character status = Code.STATUS_USE;
+
+    private Character status;
     private String mspInfo;
     private String mspImgUrl;
     private String homepageUrl;
-    private Integer activeMonths = 3;
+    private Integer activeMonths;
     private String bigo;
 
 

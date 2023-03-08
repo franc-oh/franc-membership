@@ -51,7 +51,7 @@
            AND A.MSP_ID = #{mspId}
     </select>
 
-    <select id="findByBarCd" parameterType="string" resultType="MyMembershipVo">
+    <select id="findDetailByBarCdAndFranchiseeId" parameterType="string" resultType="MyMembershipVo">
         /** MyMembershipMapper.findByBarCd */
         SELECT A.*
         FROM TB_MY_MEMBERSHIP A

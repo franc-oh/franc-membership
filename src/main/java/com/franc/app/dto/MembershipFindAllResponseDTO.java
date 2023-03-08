@@ -14,7 +14,7 @@ public class MembershipFindAllResponseDTO {
     private String resultCode;
     private String resultMessage;
 
-    private Integer membershipCnt = 0;
+    private Integer membershipCnt;
     private List<MembershipInfo> membershipList;
 
 
