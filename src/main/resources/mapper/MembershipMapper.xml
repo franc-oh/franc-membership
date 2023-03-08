@@ -10,7 +10,6 @@
         ON B.ACCOUNT_ID = #{accountId}
         AND B.STATUS = '1'
         AND A.MSP_ID = B.MSP_ID
-
     </sql>
 
 

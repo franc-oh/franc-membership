@@ -158,5 +158,20 @@
          WHERE A.CANCEL_BAR_CD = #{cancelBarCd}
     </select>
 
+    <select id="getMyMembershipTotalAccumPoint" parameterType="java.util.Map" resultType="int">
+        /** MyMembershipMapper.getMyMembershipTotalAccumPoint */
+    <![CDATA[
+        SELECT SUM(A.ACCUM_POINT) AS TOTAL_ACCUM_POINT
+        FROM TB_MY_MEMBERSHIP_ACCUM_HIS A
+        WHERE 1=1
+        AND A.ACCOUNT_ID = #{accountId}
+        AND A.MSP_ID = #{mspId}
+        AND A.STATUS = '1'
+        AND A.ACCUM_CANCEL_DATE IS NULL
+        AND SYSDATE < STR_TO_DATE(A.EXPIRE_YMD, '%Y%m%d')
+        GROUP BY A.ACCOUNT_ID, A.MSP_ID
+    ]]>
+    </select>
+
 
 </mapper>

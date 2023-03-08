@@ -157,15 +157,60 @@ public class MyMembershipMapperTests {
                 .mspId(mspId)
                 .barCd(barCd)
                 .build();
-
         myMembershipMapper.save(myMembershipVO);
+
+        // # 2. When
+        String cancelBarCd = saveAccumHisByBarCdAndFranchiseeId(barCd, franchiseeId, 10000);
+        MyMembershipAccumHisVO chkAccumHisVO = myMembershipMapper.findAccumHisById(cancelBarCd);
+
+        // # 3. Then
+        assertThat(chkAccumHisVO).isNotNull();
+        assertThat(chkAccumHisVO.getCancelBarCd()).isEqualTo(cancelBarCd);
+        assertThat(chkAccumHisVO.getStatus()).isEqualTo(Code.STATUS_USE);
+        assertThat(chkAccumHisVO.getAccumDate()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("멤버십별_적립총액_계산")
+    @Transactional
+    public void getMyMembershipTotalAccumPoint() throws Exception {
+        // # 1. Given
+        String franchiseeId = "F230228000002";
+        String barCd = createBarcode();
+
+        MyMembershipVO myMembershipVO = MyMembershipVO.builder()
+                .accountId(accountId)
+                .mspId(mspId)
+                .barCd(barCd)
+                .build();
+        myMembershipMapper.save(myMembershipVO);
+
+        saveAccumHisByBarCdAndFranchiseeId(barCd, franchiseeId, 10000);
+        saveAccumHisByBarCdAndFranchiseeId(barCd, franchiseeId, 5000);
+        saveAccumHisByBarCdAndFranchiseeId(barCd, franchiseeId, 32000);
+
+        // # 2. When
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("accountId", accountId);
+        paramMap.put("mspId", mspId);
+        int totalAccumPoint = myMembershipMapper.getMyMembershipTotalAccumPoint(paramMap);
+
+        // # 3. Then
+        assertThat(totalAccumPoint).isEqualTo(47000);
+
+    }
+
+
+
+    @Transactional
+    public String saveAccumHisByBarCdAndFranchiseeId(String barCd, String franchiseeId, int tradeAmt) throws Exception {
         MyMspDetailInfoVO myMspDetailInfoVO = myMembershipMapper.findDetailByBarCdAndFranchiseeId(barCd, franchiseeId);
+
         MembershipVO membershipInfoVO = myMspDetailInfoVO.getMembershipInfo();
         MembershipFranchiseeVO franchiseeInfoVO = myMspDetailInfoVO.getFranchiseeInfo();
         MembershipGradeVO gradeBenefitInfoVO = myMspDetailInfoVO.getGradeBenefitInfo();
 
         String cancelBarCd = createBarcode();
-        int tradeAmt = 10000;
         int accumRat = gradeBenefitInfoVO.getAccumRat();
         int accumPoint = NumberUtil.getCalcPerAmt(tradeAmt, accumRat);
         String expireYmd = DateUtil.getAddMonth(membershipInfoVO.getActiveMonths());
@@ -184,14 +229,8 @@ public class MyMembershipMapperTests {
 
         // # 2. When
         myMembershipMapper.saveAccumHis(accumHisVO);
-        MyMembershipAccumHisVO chkAccumHisVO = myMembershipMapper.findAccumHisById(cancelBarCd);
 
-        // # 3. Then
-        assertThat(chkAccumHisVO).isNotNull();
-        assertThat(chkAccumHisVO.getCancelBarCd()).isEqualTo(cancelBarCd);
-        assertThat(chkAccumHisVO.getAccumPoint()).isEqualTo(accumPoint);
-        assertThat(chkAccumHisVO.getStatus()).isEqualTo(Code.STATUS_USE);
-        assertThat(chkAccumHisVO.getAccumDate()).isNotNull();
+        return cancelBarCd;
     }
 
 

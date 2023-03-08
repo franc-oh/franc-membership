@@ -25,4 +25,7 @@ public interface MyMembershipMapper {
     void saveAccumHis(MyMembershipAccumHisVO vo) throws Exception;
 
     MyMembershipAccumHisVO findAccumHisById(@Param("cancelBarCd") String cancelBarCd) throws Exception;
+
+    Integer getMyMembershipTotalAccumPoint(Map<String, Object> map) throws Exception;
+
 }
