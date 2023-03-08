@@ -4,12 +4,12 @@
 
 <mapper namespace="com.franc.app.mapper.AccountMapper">
 
-    <select id="findAll" resultType="AccountVo">
+    <select id="findAll" resultType="AccountVO">
         /** AccountMapper.findAll */
         SELECT * FROM TB_ACCOUNT
     </select>
 
-    <select id="findById" parameterType="Long" resultType="AccountVo">
+    <select id="findById" parameterType="Long" resultType="AccountVO">
         /** AccountMapper.findById */
         SELECT * FROM TB_ACCOUNT
         WHERE ACCOUNT_ID = #{accountId}

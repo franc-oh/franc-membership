@@ -3,6 +3,7 @@ package com.franc.app.mapper;
 import com.franc.app.code.Code;
 import com.franc.app.util.DateUtil;
 import com.franc.app.vo.MyMembershipVO;
+import com.franc.app.vo.MyMspDetailInfoVO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -107,7 +108,7 @@ public class MyMembershipMapperTests {
 
 
     /**
-     * 내 멤버십 + 가맹점정보 + 현재 등급에 따른 멤버십 정책
+     * !내 멤버십 + 가맹점정보 + 현재 등급에 따른 멤버십 정책
      * 혜택저장 (INSERT)
      * 적립총액 계산
      * 총액에 따른 등급계산
@@ -116,7 +117,7 @@ public class MyMembershipMapperTests {
     @Test
     @DisplayName("바코드로_멤버십상세조회")
     @Transactional
-    public void findDetailByBarCd() throws Exception {
+    public void findDetailByBarCdAndFranchiseeId() throws Exception {
         // # 1. Given
         String barCd = createBarcode();
         String franchiseeId = "F230228000002";
@@ -130,13 +131,15 @@ public class MyMembershipMapperTests {
         myMembershipMapper.save(myMembershipVO);
 
         // # 2. When
-        MyMembershipVO resultVO = myMembershipMapper.findDetailByBarCdAndFranchiseeId(barCd, franchiseeId);
+        MyMspDetailInfoVO resultVO = myMembershipMapper.findDetailByBarCdAndFranchiseeId(barCd, franchiseeId);
 
         // # 3. Then
         assertThat(resultVO).isNotNull();
         assertThat(resultVO.getAccountId()).isEqualTo(accountId);
         assertThat(resultVO.getMspId()).isEqualTo(mspId);
         assertThat(resultVO.getStatus()).isEqualTo(Code.STATUS_USE);
+        assertThat(resultVO.getFranchiseeInfo().getFranchiseeId()).isNotNull();
+        assertThat(resultVO.getGradeBenefitInfo().getMspGradeCd()).isNotNull();
     }
 
 

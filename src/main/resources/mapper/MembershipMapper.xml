@@ -42,8 +42,8 @@
         <result property="bigo" column="BIGO" javaType="string" />
         <result property="joinYn" column="JOIN_YN" javaType="string" />
         <association property="myMspInfo" javaType="MyMembershipVO">
-            <result property="accountId" column="MY_ACCOUNT_ID" javaType="java.lang.Long" />
-            <result property="mspId" column="MY_MSP_ID" javaType="string" />
+            <id property="accountId" column="MY_ACCOUNT_ID" javaType="java.lang.Long" />
+            <id property="mspId" column="MY_MSP_ID" javaType="string" />
             <result property="status" column="MY_STATUS" javaType="java.lang.Character" />
             <result property="totalAccumPoint" column="MY_TOTAL_ACCUM_POINT" javaType="int" />
             <result property="mspGradeCd" column="MY_MSP_GRADE_CD" javaType="string" />

@@ -1,6 +1,7 @@
 package com.franc.app.mapper;
 
 import com.franc.app.vo.MyMembershipVO;
+import com.franc.app.vo.MyMspDetailInfoVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -18,5 +19,5 @@ public interface MyMembershipMapper {
 
     MyMembershipVO findById(Map<String, Object> paramMap) throws Exception;
 
-    MyMembershipVO findDetailByBarCdAndFranchiseeId(@Param("barCd") String barCd, @Param("franchiseeId") String franchiseeId) throws Exception;
+    MyMspDetailInfoVO findDetailByBarCdAndFranchiseeId(@Param("barCd") String barCd, @Param("franchiseeId") String franchiseeId) throws Exception;
 }

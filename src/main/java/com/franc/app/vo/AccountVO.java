@@ -2,6 +2,7 @@ package com.franc.app.vo;
 
 import com.franc.app.code.Code;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 
@@ -10,7 +11,7 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(of = "accountId")
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 public class AccountVO {
 
     private Long accountId;

@@ -9,7 +9,7 @@
         VALUES NEXT VALUE FOR MEMBERSHIP.BARCODE_SEQ
     </select>
 
-    <insert id="save" parameterType="MyMembershipVo">
+    <insert id="save" parameterType="MyMembershipVO">
         /** MyMembershipMapper.save */
         INSERT INTO TB_MY_MEMBERSHIP
         VALUES (
@@ -24,7 +24,7 @@
         )
     </insert>
 
-    <update id="rejoin" parameterType="MyMembershipVo">
+    <update id="rejoin" parameterType="MyMembershipVO">
         /** MyMembershipMapper.rejoin */
         UPDATE TB_MY_MEMBERSHIP
            SET STATUS = '1'
@@ -33,7 +33,7 @@
            AND MSP_ID = #{mspId}
     </update>
 
-    <update id="withdrawal" parameterType="MyMembershipVo">
+    <update id="withdrawal" parameterType="MyMembershipVO">
         /** MyMembershipMapper.withdrawal */
         UPDATE TB_MY_MEMBERSHIP
         SET STATUS = '0'
@@ -42,7 +42,7 @@
         AND MSP_ID = #{mspId}
     </update>
 
-    <select id="findById" parameterType="java.util.Map" resultType="MyMembershipVo">
+    <select id="findById" parameterType="java.util.Map" resultType="MyMembershipVO">
         /** MyMembershipMapper.findById */
         SELECT A.*
           FROM TB_MY_MEMBERSHIP A
@@ -51,10 +51,66 @@
            AND A.MSP_ID = #{mspId}
     </select>
 
-    <select id="findDetailByBarCdAndFranchiseeId" parameterType="string" resultType="MyMembershipVo">
+
+
+    <resultMap id="myMspDetailMap" type="MyMspDetailInfoVO">
+        <id property="accountId" column="ACCOUNT_ID" javaType="java.lang.Long" />
+        <id property="mspId" column="MSP_ID" javaType="string" />
+        <result property="status" column="STATUS" javaType="java.lang.Character" />
+        <result property="totalAccumPoint" column="TOTAL_ACCUM_POINT" javaType="int" />
+        <result property="mspGradeCd" column="MSP_GRADE_CD" javaType="string" />
+        <result property="insertDate" column="INSERT_DATE" javaType="java.time.LocalDateTime" />
+        <result property="withdrawalDate" column="WITHDRAWAL_DATE" javaType="java.time.LocalDateTime" />
+        <result property="barCd" column="BAR_CD" javaType="string" />
+        <association property="franchiseeInfo" javaType="MembershipFranchiseeVO">
+            <id property="mspId" column="FRCHS_MSP_ID" javaType="string" />
+            <id property="franchiseeId" column="FRCHS_FRANCHISEE_ID" javaType="string" />
+            <result property="franchiseeNm" column="FRCHS_FRANCHISEE_NM" javaType="string" />
+            <result property="status" column="FRCHS_STATUS" javaType="java.lang.Character" />
+            <result property="zipCd" column="FRCHS_ZIP_CD" javaType="string" />
+            <result property="addr1" column="FRCHS_ADDR1" javaType="string" />
+            <result property="addr2" column="FRCHS_ADDR2" javaType="string" />
+            <result property="telNo" column="FRCHS_TEL_NO" javaType="string" />
+            <result property="bigo" column="FRCHS_BIGO" javaType="string" />
+        </association>
+        <association property="gradeBenefitInfo" javaType="MembershipGradeVO">
+            <id property="mspId" column="GRADE_MSP_ID" javaType="string" />
+            <id property="mspGradeCd" column="GRADE_MSP_GRADE_CD" javaType="string" />
+            <result property="gradeUpPointFr" column="GRADE_UP_POINT_FR" javaType="int" />
+            <result property="gradeUpPointTo" column="GRADE_UP_POINT_TO" javaType="int" />
+            <result property="accumRat" column="GRADE_ACCUM_RAT" javaType="int" />
+            <result property="discRat" column="GRADE_DISC_RAT" javaType="int" />
+        </association>
+    </resultMap>
+
+
+
+
+    <select id="findDetailByBarCdAndFranchiseeId" parameterType="string" resultMap="myMspDetailMap">
         /** MyMembershipMapper.findByBarCd */
         SELECT A.*
+             , B.MSP_ID AS FRCHS_MSP_ID
+             , B.FRANCHISEE_ID AS FRCHS_FRANCHISEE_ID
+             , B.FRANCHISEE_NM AS FRCHS_FRANCHISEE_NM
+             , B.STATUS AS FRCHS_STATUS
+             , B.ZIP_CD AS FRCHS_ZIP_CD
+             , B.ADDR1 AS FRCHS_ADDR1
+             , B.ADDR2 AS FRCHS_ADDR2
+             , B.TEL_NO AS FRCHS_TEL_NO
+             , B.BIGO AS FRCHS_BIGO
+             , C.MSP_ID AS GRADE_MSP_ID
+             , C.MSP_GRADE_CD AS GRADE_MSP_GRADE_CD
+             , C.GRADE_UP_POINT_FR AS GRADE_UP_POINT_FR
+             , C.GRADE_UP_POINT_TO AS GRADE_UP_POINT_TO
+             , C.ACCUM_RAT AS GRADE_ACCUM_RAT
+             , C.DISC_RAT AS GRADE_DISC_RAT
         FROM TB_MY_MEMBERSHIP A
+        LEFT OUTER JOIN TB_MEMBERSHIP_FRANCHISEE B
+            ON B.MSP_ID = A.MSP_ID
+            AND B.FRANCHISEE_ID = #{franchiseeId}
+        LEFT OUTER JOIN TB_MEMBERSHIP_GRADE C
+            ON C.MSP_ID = A.MSP_ID
+            AND C.MSP_GRADE_CD = A.MSP_GRADE_CD
         WHERE 1=1
         AND A.BAR_CD = #{barCd}
     </select>
