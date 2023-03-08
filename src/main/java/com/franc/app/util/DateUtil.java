@@ -50,5 +50,10 @@ public class DateUtil {
         return targetDate.compareTo(LocalDate.now());
     }
 
+    public static String getAddMonth(int addMonths) {
+        LocalDate localDate = LocalDate.now().plusMonths(addMonths);
+        return localDate.format((DateTimeFormatter.ofPattern("yyyyMMdd")));
+    }
+
 
 }

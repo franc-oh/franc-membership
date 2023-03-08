@@ -27,7 +27,7 @@ public class MyMembershipService {
      * @return
      * @throws Exception
      */
-    public String getBarcode() throws Exception {
+    public synchronized String getBarcode() throws Exception {
 
         // # 1. 바코드 시퀀스 생성
         Integer seq = myMembershipMapper.getBarcodeSeq();

@@ -11,6 +11,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class MyMspDetailInfoVO extends MyMembershipVO {
 
+    private MembershipVO membershipInfo;
     private MembershipFranchiseeVO franchiseeInfo;
     private MembershipGradeVO gradeBenefitInfo;
 

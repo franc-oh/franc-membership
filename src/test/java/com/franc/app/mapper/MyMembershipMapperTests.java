@@ -2,8 +2,8 @@ package com.franc.app.mapper;
 
 import com.franc.app.code.Code;
 import com.franc.app.util.DateUtil;
-import com.franc.app.vo.MyMembershipVO;
-import com.franc.app.vo.MyMspDetailInfoVO;
+import com.franc.app.util.NumberUtil;
+import com.franc.app.vo.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -108,8 +108,8 @@ public class MyMembershipMapperTests {
 
 
     /**
-     * !내 멤버십 + 가맹점정보 + 현재 등급에 따른 멤버십 정책
-     * 혜택저장 (INSERT)
+     * ! 내 멤버십 + 가맹점정보 + 현재 등급에 따른 멤버십 정책
+     * ! 혜택저장 (INSERT)
      * 적립총액 계산
      * 총액에 따른 등급계산
      * 멤버십 등급 산출 (UPDATE)
@@ -140,6 +140,58 @@ public class MyMembershipMapperTests {
         assertThat(resultVO.getStatus()).isEqualTo(Code.STATUS_USE);
         assertThat(resultVO.getFranchiseeInfo().getFranchiseeId()).isNotNull();
         assertThat(resultVO.getGradeBenefitInfo().getMspGradeCd()).isNotNull();
+        assertThat(resultVO.getMembershipInfo().getMspId()).isNotNull();
+
+    }
+
+    @Test
+    @DisplayName("멤버십_적립내역_저장")
+    @Transactional
+    public void saveAccumHis() throws Exception {
+        // # 1. Given
+        String barCd = createBarcode();
+        String franchiseeId = "F230228000002";
+
+        MyMembershipVO myMembershipVO = MyMembershipVO.builder()
+                .accountId(accountId)
+                .mspId(mspId)
+                .barCd(barCd)
+                .build();
+
+        myMembershipMapper.save(myMembershipVO);
+        MyMspDetailInfoVO myMspDetailInfoVO = myMembershipMapper.findDetailByBarCdAndFranchiseeId(barCd, franchiseeId);
+        MembershipVO membershipInfoVO = myMspDetailInfoVO.getMembershipInfo();
+        MembershipFranchiseeVO franchiseeInfoVO = myMspDetailInfoVO.getFranchiseeInfo();
+        MembershipGradeVO gradeBenefitInfoVO = myMspDetailInfoVO.getGradeBenefitInfo();
+
+        String cancelBarCd = createBarcode();
+        int tradeAmt = 10000;
+        int accumRat = gradeBenefitInfoVO.getAccumRat();
+        int accumPoint = NumberUtil.getCalcPerAmt(tradeAmt, accumRat);
+        String expireYmd = DateUtil.getAddMonth(membershipInfoVO.getActiveMonths());
+
+        MyMembershipAccumHisVO accumHisVO = MyMembershipAccumHisVO.builder()
+                .cancelBarCd(cancelBarCd)
+                .accountId(accountId)
+                .mspId(mspId)
+                .franchiseeId(franchiseeId)
+                .tradeAmt(tradeAmt)
+                .mspGradeCd(myMspDetailInfoVO.getMspGradeCd())
+                .accumRat(accumRat)
+                .accumPoint(accumPoint)
+                .expireYmd(expireYmd)
+                .build();
+
+        // # 2. When
+        myMembershipMapper.saveAccumHis(accumHisVO);
+        MyMembershipAccumHisVO chkAccumHisVO = myMembershipMapper.findAccumHisById(cancelBarCd);
+
+        // # 3. Then
+        assertThat(chkAccumHisVO).isNotNull();
+        assertThat(chkAccumHisVO.getCancelBarCd()).isEqualTo(cancelBarCd);
+        assertThat(chkAccumHisVO.getAccumPoint()).isEqualTo(accumPoint);
+        assertThat(chkAccumHisVO.getStatus()).isEqualTo(Code.STATUS_USE);
+        assertThat(chkAccumHisVO.getAccumDate()).isNotNull();
     }
 
 
