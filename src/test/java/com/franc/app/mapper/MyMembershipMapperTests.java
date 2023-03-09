@@ -106,14 +106,6 @@ public class MyMembershipMapperTests {
 
     }
 
-
-    /**
-     * ! 내 멤버십 + 가맹점정보 + 현재 등급에 따른 멤버십 정책
-     * ! 혜택저장 (INSERT)
-     * ! 적립총액 계산
-     * 총액에 따른 등급계산
-     * 멤버십 등급 산출 (UPDATE)
-     */
     @Test
     @DisplayName("바코드로_멤버십상세조회")
     @Transactional
@@ -200,6 +192,91 @@ public class MyMembershipMapperTests {
 
     }
 
+    @Test
+    @DisplayName("총액에 따른 등급가져오기")
+    @Transactional
+    public void getMembershipGradeByPoint() throws Exception {
+        // # 1. Given
+        String franchiseeId = "F230228000002";
+        String barCd = createBarcode();
+
+        MyMembershipVO myMembershipVO = MyMembershipVO.builder()
+                .accountId(accountId)
+                .mspId(mspId)
+                .barCd(barCd)
+                .build();
+        myMembershipMapper.save(myMembershipVO);
+
+        saveAccumHisByBarCdAndFranchiseeId(barCd, franchiseeId, 120000);
+
+        Map<String, Object> getTotalAccumPointparamMap = new HashMap<>();
+        getTotalAccumPointparamMap.put("accountId", accountId);
+        getTotalAccumPointparamMap.put("mspId", mspId);
+        int totalAccumPoint = myMembershipMapper.getMyMembershipTotalAccumPoint(getTotalAccumPointparamMap);
+
+
+        // # 2. When
+        Map<String, Object> getGradeParamMap = new HashMap<>();
+        getGradeParamMap.put("point", totalAccumPoint);
+        getGradeParamMap.put("mspId", mspId);
+        MembershipGradeVO gradeVO = myMembershipMapper.getMembershipGradeByPoint(getGradeParamMap);
+
+        // # 3. Then
+        assertThat(gradeVO).isNotNull();
+        assertThat(gradeVO.getMspId()).isEqualTo(mspId);
+        assertThat(gradeVO.getMspGradeCd()).isEqualTo(Code.MEMBERSHIP_GRADE_SILVER);
+    }
+
+    @Test
+    @DisplayName("멤버십_포인트_등급_변경")
+    @Transactional
+    public void updatePointAndGrade() throws Exception {
+        // # 1. Given
+        String franchiseeId = "F230228000002";
+        String barCd = createBarcode();
+
+        MyMembershipVO myMembershipVO = MyMembershipVO.builder()
+                .accountId(accountId)
+                .mspId(mspId)
+                .barCd(barCd)
+                .build();
+        myMembershipMapper.save(myMembershipVO);
+
+        saveAccumHisByBarCdAndFranchiseeId(barCd, franchiseeId, 120000);
+
+        Map<String, Object> getTotalAccumPointparamMap = new HashMap<>();
+        getTotalAccumPointparamMap.put("accountId", accountId);
+        getTotalAccumPointparamMap.put("mspId", mspId);
+        int totalAccumPoint = myMembershipMapper.getMyMembershipTotalAccumPoint(getTotalAccumPointparamMap);
+
+        Map<String, Object> getGradeParamMap = new HashMap<>();
+        getGradeParamMap.put("point", totalAccumPoint);
+        getGradeParamMap.put("mspId", mspId);
+        MembershipGradeVO gradeVO = myMembershipMapper.getMembershipGradeByPoint(getGradeParamMap);
+        String mspGradeCd = gradeVO.getMspGradeCd();
+
+        MyMembershipVO updateMyMembershipVO = MyMembershipVO.builder()
+                .accountId(accountId)
+                .mspId(mspId)
+                .mspGradeCd(mspGradeCd)
+                .totalAccumPoint(totalAccumPoint)
+                .build();
+
+        // # 2. When
+        myMembershipMapper.updatePointAndGrade(updateMyMembershipVO);
+
+        Map<String, Object> getFindByIdParamMap = new HashMap<>();
+        getFindByIdParamMap.put("accountId", accountId);
+        getFindByIdParamMap.put("mspId", mspId);
+        MyMembershipVO resultMyMembershipVO = myMembershipMapper.findById(getFindByIdParamMap);
+
+        // # 3. Then
+        assertThat(resultMyMembershipVO).isNotNull();
+        assertThat(resultMyMembershipVO.getAccountId()).isEqualTo(accountId);
+        assertThat(resultMyMembershipVO.getMspId()).isEqualTo(mspId);
+        assertThat(resultMyMembershipVO.getMspGradeCd()).isEqualTo(mspGradeCd);
+        assertThat(resultMyMembershipVO.getTotalAccumPoint()).isEqualTo(totalAccumPoint);
+    }
 
 
     @Transactional

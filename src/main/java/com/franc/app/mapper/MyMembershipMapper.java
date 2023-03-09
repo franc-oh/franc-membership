@@ -1,5 +1,6 @@
 package com.franc.app.mapper;
 
+import com.franc.app.vo.MembershipGradeVO;
 import com.franc.app.vo.MyMembershipAccumHisVO;
 import com.franc.app.vo.MyMembershipVO;
 import com.franc.app.vo.MyMspDetailInfoVO;
@@ -18,6 +19,8 @@ public interface MyMembershipMapper {
 
     void withdrawal(MyMembershipVO vo) throws Exception;
 
+    void updatePointAndGrade(MyMembershipVO vo) throws Exception;
+
     MyMembershipVO findById(Map<String, Object> paramMap) throws Exception;
 
     MyMspDetailInfoVO findDetailByBarCdAndFranchiseeId(@Param("barCd") String barCd, @Param("franchiseeId") String franchiseeId) throws Exception;
@@ -27,5 +30,9 @@ public interface MyMembershipMapper {
     MyMembershipAccumHisVO findAccumHisById(@Param("cancelBarCd") String cancelBarCd) throws Exception;
 
     Integer getMyMembershipTotalAccumPoint(Map<String, Object> map) throws Exception;
+
+    MembershipGradeVO getMembershipGradeByPoint(Map<String, Object> map) throws Exception;
+
+
 
 }

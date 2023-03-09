@@ -24,6 +24,15 @@
         )
     </insert>
 
+    <update id="updatePointAndGrade" parameterType="MyMembershipVO">
+        /** MyMembershipMapper.updatePointAndGrade */
+        UPDATE TB_MY_MEMBERSHIP
+        SET TOTAL_ACCUM_POINT = #{totalAccumPoint}
+        , MSP_GRADE_CD = #{mspGradeCd}
+        WHERE ACCOUNT_ID = #{accountId}
+        AND MSP_ID = #{mspId}
+    </update>
+
     <update id="rejoin" parameterType="MyMembershipVO">
         /** MyMembershipMapper.rejoin */
         UPDATE TB_MY_MEMBERSHIP
@@ -171,6 +180,16 @@
         AND NOW() < STR_TO_DATE(A.EXPIRE_YMD, '%Y%m%d')
         GROUP BY A.ACCOUNT_ID, A.MSP_ID
     ]]>
+    </select>
+
+    <select id="getMembershipGradeByPoint" parameterType="java.util.Map" resultType="MembershipGradeVO">
+        /** MyMembershipMapper.getMembershipGradeByPoint */
+        SELECT A.*
+        FROM TB_MEMBERSHIP_GRADE A
+        WHERE 1=1
+        AND A.MSP_ID = #{mspId}
+        AND #{point} BETWEEN A.GRADE_UP_POINT_FR AND A.GRADE_UP_POINT_TO
+        AND ROWNUM = 1
     </select>
 
 
