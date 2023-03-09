@@ -110,7 +110,7 @@ public class MyMembershipMapperTests {
     /**
      * ! 내 멤버십 + 가맹점정보 + 현재 등급에 따른 멤버십 정책
      * ! 혜택저장 (INSERT)
-     * 적립총액 계산
+     * ! 적립총액 계산
      * 총액에 따른 등급계산
      * 멤버십 등급 산출 (UPDATE)
      */
@@ -186,8 +186,8 @@ public class MyMembershipMapperTests {
         myMembershipMapper.save(myMembershipVO);
 
         saveAccumHisByBarCdAndFranchiseeId(barCd, franchiseeId, 10000);
-        saveAccumHisByBarCdAndFranchiseeId(barCd, franchiseeId, 5000);
-        saveAccumHisByBarCdAndFranchiseeId(barCd, franchiseeId, 32000);
+        saveAccumHisByBarCdAndFranchiseeId(barCd, franchiseeId, 10000);
+        saveAccumHisByBarCdAndFranchiseeId(barCd, franchiseeId, 10000);
 
         // # 2. When
         Map<String, Object> paramMap = new HashMap<>();
@@ -196,7 +196,7 @@ public class MyMembershipMapperTests {
         int totalAccumPoint = myMembershipMapper.getMyMembershipTotalAccumPoint(paramMap);
 
         // # 3. Then
-        assertThat(totalAccumPoint).isEqualTo(47000);
+        assertThat(totalAccumPoint).isEqualTo(900);
 
     }
 

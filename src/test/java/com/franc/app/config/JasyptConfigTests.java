@@ -14,7 +14,7 @@ import static org.assertj.core.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(properties = {"spring.profiles.active=test", "jasypt.encryptor.password=franc_msp"})
-public class JasyptConfigTest {
+public class JasyptConfigTests {
 
     @Value("${jasypt.encryptor.password}")
     private String encryptKey;

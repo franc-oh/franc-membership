@@ -168,7 +168,7 @@
         AND A.MSP_ID = #{mspId}
         AND A.STATUS = '1'
         AND A.ACCUM_CANCEL_DATE IS NULL
-        AND SYSDATE < STR_TO_DATE(A.EXPIRE_YMD, '%Y%m%d')
+        AND NOW() < STR_TO_DATE(A.EXPIRE_YMD, '%Y%m%d')
         GROUP BY A.ACCOUNT_ID, A.MSP_ID
     ]]>
     </select>
