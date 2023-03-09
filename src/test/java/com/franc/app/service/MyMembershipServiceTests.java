@@ -4,20 +4,25 @@ import com.franc.app.code.Code;
 import com.franc.app.exception.BizException;
 import com.franc.app.exception.ExceptionResult;
 import com.franc.app.mapper.MyMembershipMapper;
-import com.franc.app.vo.MyMembershipVO;
+import com.franc.app.vo.*;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,10 +34,12 @@ public class MyMembershipServiceTests {
     @Mock
     private MyMembershipMapper myMembershipMapper;
 
+    @Spy
+    private ModelMapper modelMapper;
+
 
     Long accountId = 5L;
     String mspId = "M230227000001";
-
 
 
     @Test
@@ -203,6 +210,156 @@ public class MyMembershipServiceTests {
         verify(myMembershipMapper, times(1)).withdrawal(any(MyMembershipVO.class));
     }
 
+    @Test
+    @DisplayName("멤버십적립실패_바코드_데이터_없음")
+    public void accum_fail_no_data() throws Exception {
+        // # 1. Given
+        String barCd = "20230309173630000001";
+        String franchiseeId = "F230228000002";
+        int tradeAmt = 10000;
+
+        Map<String, Object> requestMap = new HashMap<>();
+        requestMap.put("barCd", barCd);
+        requestMap.put("franchiseeId", franchiseeId);
+        requestMap.put("tradeAmt", tradeAmt);
+
+        when(myMembershipMapper.findDetailByBarCdAndFranchiseeId(anyString(), anyString()))
+                .thenReturn(null);
+
+        // # 2. When
+        BizException exception =
+                assertThrows(BizException.class, () -> myMembershipService.accum(requestMap));
+
+        // # 3. Then
+        assertThat(exception.getClass()).isEqualTo(BizException.class);
+        assertThat(exception.getResult()).isEqualTo(ExceptionResult.NOT_FOUND_BARCODE_INFO);
+
+        verify(myMembershipMapper, times(1)).findDetailByBarCdAndFranchiseeId(anyString(), anyString());
+    }
+
+    @Test
+    @DisplayName("멤버십적립실패_멤버십관련정보_없음")
+    public void accum_fail_not_found_membership() throws Exception {
+        // # 1. Given
+        int totalAccumPoint = 0;
+        String barCd = "20230309173630000001";
+        String franchiseeId = "F230228000002";
+        int tradeAmt = 10000;
+
+        Map<String, Object> requestMap = new HashMap<>();
+        requestMap.put("barCd", barCd);
+        requestMap.put("franchiseeId", franchiseeId);
+        requestMap.put("tradeAmt", tradeAmt);
+
+        MyMspDetailInfoVO myMspDetailInfoVO = MyMspDetailInfoVO.builder()
+                        .accountId(accountId)
+                        .mspId(mspId)
+                        .barCd(barCd)
+                        .build();
+
+        when(myMembershipMapper.findDetailByBarCdAndFranchiseeId(anyString(), anyString()))
+                .thenReturn(myMspDetailInfoVO);
+
+        // # 2. When
+        BizException exception =
+                assertThrows(BizException.class, () -> myMembershipService.accum(requestMap));
+
+        // # 3. Then
+        assertThat(exception.getClass()).isEqualTo(BizException.class);
+        assertThat(exception.getResult()).isEqualTo(ExceptionResult.NOT_FOUND_MEMBERSHIP);
+
+        verify(myMembershipMapper, times(1)).findDetailByBarCdAndFranchiseeId(anyString(), anyString());
+    }
+
+    @Test
+    @DisplayName("멤버십적립실패_멤버십상태_정상아님")
+    public void accum_fail_not_use_membership() throws Exception {
+        // # 1. Given
+        int totalAccumPoint = 0;
+        String barCd = "20230309173630000001";
+        String franchiseeId = "F230228000002";
+        int tradeAmt = 10000;
+
+        Map<String, Object> requestMap = new HashMap<>();
+        requestMap.put("barCd", barCd);
+        requestMap.put("franchiseeId", franchiseeId);
+        requestMap.put("tradeAmt", tradeAmt);
+
+        MyMspDetailInfoVO myMspDetailInfoVO = MyMspDetailInfoVO.builder()
+                .accountId(accountId)
+                .mspId(mspId)
+                .barCd(barCd)
+                .membershipInfo(MembershipVO.builder()
+                        .mspId(mspId)
+                        .status(Code.STATUS_STOP)
+                        .build())
+                .franchiseeInfo(MembershipFranchiseeVO.builder().build())
+                .gradeBenefitInfo(MembershipGradeVO.builder().build())
+                .build();
+
+        when(myMembershipMapper.findDetailByBarCdAndFranchiseeId(anyString(), anyString()))
+                .thenReturn(myMspDetailInfoVO);
+
+        // # 2. When
+        BizException exception =
+                assertThrows(BizException.class, () -> myMembershipService.accum(requestMap));
+
+        // # 3. Then
+        assertThat(exception.getClass()).isEqualTo(BizException.class);
+        assertThat(exception.getResult()).isEqualTo(ExceptionResult.NOT_ACTIVE_MEMBERSHIP);
+
+        verify(myMembershipMapper, times(1)).findDetailByBarCdAndFranchiseeId(anyString(), anyString());
+    }
+
+    @Test
+    @DisplayName("멤버십적립성공")
+    public void accum_success() throws Exception {
+        // # 1. Given
+        int totalAccumPoint = 0;
+        String barCd = "20230309173630000001";
+        String franchiseeId = "F230228000002";
+        int tradeAmt = 10000;
+
+        Map<String, Object> requestMap = new HashMap<>();
+        requestMap.put("barCd", barCd);
+        requestMap.put("franchiseeId", franchiseeId);
+        requestMap.put("tradeAmt", tradeAmt);
+
+        MyMspDetailInfoVO myMspDetailInfoVO = MyMspDetailInfoVO.builder()
+                .accountId(accountId)
+                .mspId(mspId)
+                .barCd(barCd)
+                .mspGradeCd(Code.MEMBERSHIP_GRADE_COMMON)
+                .membershipInfo(MembershipVO.builder()
+                        .mspId(mspId)
+                        .status(Code.STATUS_USE)
+                        .build())
+                .franchiseeInfo(MembershipFranchiseeVO.builder()
+                        .mspId(mspId)
+                        .franchiseeId(franchiseeId)
+                        .status(Code.STATUS_USE)
+                        .build())
+                .gradeBenefitInfo(MembershipGradeVO.builder()
+                        .mspId(mspId)
+                        .mspGradeCd(Code.MEMBERSHIP_GRADE_COMMON)
+                        .accumRat(3)
+                        .build())
+                .build();
+
+        when(myMembershipMapper.findDetailByBarCdAndFranchiseeId(anyString(), anyString()))
+                .thenReturn(myMspDetailInfoVO);
+
+        doNothing().when(myMembershipMapper)
+                .saveAccumHis(any(MyMembershipAccumHisVO.class));
+
+        // # 2. When
+        MyMspDetailInfoVO resultVO = myMembershipService.accum(requestMap);
+
+        // # 3. Then
+
+        verify(myMembershipMapper, times(1)).findDetailByBarCdAndFranchiseeId(anyString(), anyString());
+        verify(myMembershipMapper, times(1)).saveAccumHis(any(MyMembershipAccumHisVO.class));
+    }
 
     public MyMembershipVO buildVo(Long accountId, String mspId, Character status,
                                   Integer totalAccumPoint, String mspGradeCd, String barCd, LocalDateTime withdrawalDate) {

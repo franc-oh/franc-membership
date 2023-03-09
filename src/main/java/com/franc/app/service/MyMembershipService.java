@@ -5,7 +5,8 @@ import com.franc.app.exception.BizException;
 import com.franc.app.exception.ExceptionResult;
 import com.franc.app.mapper.MyMembershipMapper;
 import com.franc.app.util.DateUtil;
-import com.franc.app.vo.MyMembershipVO;
+import com.franc.app.util.NumberUtil;
+import com.franc.app.vo.*;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -93,6 +94,11 @@ public class MyMembershipService {
 
     }
 
+    /**
+     * 멤버십 탈퇴
+     * @param paramVO
+     * @throws Exception
+     */
     public void withdrawal(MyMembershipVO paramVO) throws Exception {
         logger.info("My Membership Withdrawal Start : " + paramVO.toString());
 
@@ -113,6 +119,127 @@ public class MyMembershipService {
         myMembershipMapper.withdrawal(paramVO);
 
         logger.info("My Membership Withdrawal Success!!");
+    }
+
+    /**
+     * 멤버십 적립
+     * @param paramMap {barCd, franchisseId, tradeAmt}
+     * @return
+     * @throws Exception
+     */
+    public MyMspDetailInfoVO accum(Map<String, Object> paramMap) throws Exception {
+        logger.info("My Membership Accum Start : " + paramMap.toString());
+
+        // #1. 바코드로 상세가입정보 가져오기
+        String barCd = String.valueOf(paramMap.get("barCd"));
+        String franchiseeId = String.valueOf(paramMap.get("franchiseeId"));
+        int tradeAmt = Integer.parseInt(String.valueOf(paramMap.get("tradeAmt")));
+        MyMspDetailInfoVO response = myMembershipMapper.findDetailByBarCdAndFranchiseeId(barCd, franchiseeId);
+        if(response == null)
+            throw new BizException(ExceptionResult.NOT_FOUND_BARCODE_INFO);
+
+        MembershipVO membershipInfoVO = response.getMembershipInfo();
+        MembershipFranchiseeVO franchiseeInfoVO = response.getFranchiseeInfo();
+        MembershipGradeVO gradeBenefitInfoVO = response.getGradeBenefitInfo();
+
+        if(membershipInfoVO == null || franchiseeInfoVO == null || gradeBenefitInfoVO == null)
+            throw new BizException(ExceptionResult.NOT_FOUND_MEMBERSHIP);
+
+        // #2. 가져온 상세정보를 통해 유효성 체크 및 적립데이터 셋팅
+        if(membershipInfoVO.getStatus() != Code.STATUS_USE)
+            throw new BizException(ExceptionResult.NOT_ACTIVE_MEMBERSHIP);
+        if(franchiseeInfoVO.getStatus() != Code.STATUS_USE)
+            throw new BizException(ExceptionResult.NOT_ACTIVE_FRANCHISEE);
+
+        // #3. 적립내역등록
+        Long accountId = response.getAccountId();
+        String mspId = response.getMspId();
+        int accumRat = response.getGradeBenefitInfo().getAccumRat();
+        int accumPoint = NumberUtil.getCalcPerAmt(tradeAmt, accumRat);
+
+        MyMembershipAccumHisVO myMembershipAccumHisVO = MyMembershipAccumHisVO.builder()
+                .cancelBarCd(getBarcode())
+                .accountId(accountId)
+                .mspId(mspId)
+                .franchiseeId(franchiseeId)
+                .tradeAmt(tradeAmt)
+                .mspGradeCd(response.getMspGradeCd())
+                .accumRat(accumRat)
+                .accumPoint(accumPoint)
+                .build();
+
+        myMembershipMapper.saveAccumHis(myMembershipAccumHisVO);
+
+        logger.info("My Membership Accum Success!!");
+
+        return response;
+    }
+
+    /**
+     * 사용자의 멤버십 총 적립금 가져오기
+     * @param accountId
+     * @param mspId
+     * @return
+     * @throws Exception
+     */
+    public int getMyMembershipTotalAccumPoint(Long accountId, String mspId) throws Exception {
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("accountId", accountId);
+        paramMap.put("mspId", mspId);
+        int totalAccumPoint = myMembershipMapper.getMyMembershipTotalAccumPoint(paramMap);
+
+        logger.info("TotalAccumPoint : " + totalAccumPoint);
+
+        return totalAccumPoint;
+    }
+
+    /**
+     * 총액에 따른 등급가져오기
+     * @param mspId
+     * @param point
+     * @return
+     * @throws Exception
+     */
+    public MembershipGradeVO getMembershipGradeByPoint(String mspId, int point) throws Exception {
+        Map<String, Object> getGradeParamMap = new HashMap<>();
+        getGradeParamMap.put("point", point);
+        getGradeParamMap.put("mspId", mspId);
+
+        MembershipGradeVO gradeVO = myMembershipMapper.getMembershipGradeByPoint(getGradeParamMap);
+        if(gradeVO == null)
+          throw new BizException(ExceptionResult.NOT_FOUND_GRADE);
+
+        logger.info("targetGrade : " + gradeVO.getMspGradeCd());
+
+        return gradeVO;
+    }
+
+    /**
+     * 적립 포인트 총액 계산 + 등급갱신
+     * @param accountId
+     * @param mspId
+     * @return
+     * @throws Exception
+     */
+    public void calcTotalPointAndUpdateGrade(Long accountId, String mspId) throws Exception {
+        logger.info("My Membership Update Grade Start");
+
+        // 1. 적립 총액 가져오기
+        int totalAccumPoint = getMyMembershipTotalAccumPoint(accountId, mspId);
+
+        // 2. 적립총액에 따른 등급정보 가져오기
+        MembershipGradeVO targetGradeVO = getMembershipGradeByPoint(mspId, totalAccumPoint);
+
+        String targetGradeCd = targetGradeVO.getMspGradeCd();
+
+        myMembershipMapper.updatePointAndGrade(MyMembershipVO.builder()
+                .accountId(accountId)
+                .mspId(mspId)
+                .mspGradeCd(targetGradeCd)
+                .totalAccumPoint(totalAccumPoint)
+                .build());
+
+        logger.info("My Membership Update Grade Success");
     }
 
 
