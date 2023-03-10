@@ -3,15 +3,15 @@ package com.franc.app.controller;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.franc.app.code.Code;
+import com.franc.app.dto.MyMembershipAccumRequestDTO;
 import com.franc.app.dto.MyMembershipJoinRequestDTO;
 import com.franc.app.dto.MyMembershipWithdrawalRequestDTO;
 import com.franc.app.exception.BizException;
-import com.franc.app.exception.ExceptionResult;
 import com.franc.app.exception.ControllerExceptionHandler;
+import com.franc.app.exception.ExceptionResult;
 import com.franc.app.service.AccountService;
 import com.franc.app.service.MyMembershipService;
-import com.franc.app.vo.AccountVO;
-import com.franc.app.vo.MyMembershipVO;
+import com.franc.app.vo.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -31,6 +31,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -70,6 +72,7 @@ public class MyMembershipControllerTests {
     }
 
     private static final String URL = "/api/msp/my_membership";
+    private static final String ACCUM_URL = "/api/msp/my_membership/accum";
 
     @ParameterizedTest
     @MethodSource("join_fail_valid_params")
@@ -301,6 +304,163 @@ public class MyMembershipControllerTests {
         verify(accountService, times(1)).getInfoAndCheckStatus(anyLong());
         verify(myMembershipService, times(1)).withdrawal(any(MyMembershipVO.class));
     }
+
+
+    /*
+    1. 필수요청값체크
+    2. 멤버십가입여부조회
+    3. 검증 및 데이터 가져오기
+        - 바코드에 해당하는 멤버십 있는지 확인
+            - 멤버십 상태확인
+        - 가맹점조회 및 체크
+            - 상태확인
+        - 현재 등급에 따른 멤버십 정책가져오기
+    4. 적립저장
+
+    5. 적립금처리 및 등급처리
+        - 적립총액 계산
+        - 총액에 따른 등급계산
+    6. 맴버십 적립정보 응답
+     */
+
+    @Test
+    @DisplayName("멤버십적립_바코드_실패_필수값")
+    public void accum_fail_valid() throws Exception {
+        // # 1. Given
+        MyMembershipAccumRequestDTO requestDTO = MyMembershipAccumRequestDTO.builder().build();
+
+        // # 2. When
+        ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.post(ACCUM_URL)
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+                        .accept(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+                        .content(objectMapper.writeValueAsString(requestDTO))
+        ).andDo(print());
+
+
+        // # 3. Then
+        resultActions.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("resultCode").value(ExceptionResult.PARAMETER_NOT_VALID.getCode().value()))
+                .andExpect(jsonPath("resultMessage").value(ExceptionResult.PARAMETER_NOT_VALID.getMessage()));
+    }
+
+
+    @Test
+    @DisplayName("멤버십적립_바코드_실패_적립메소드_오류")
+    public void accum_fail_proc_error() throws Exception {
+        // # 1. Given
+        MyMembershipAccumRequestDTO requestDTO = MyMembershipAccumRequestDTO.builder()
+                .barCd("123")
+                .franchisseId("2222")
+                .tradeAmt(1000)
+                .build();
+
+        when(myMembershipService.accum(any(HashMap.class)))
+                .thenThrow(new BizException(ExceptionResult.NOT_FOUND_BARCODE_INFO));
+
+        // # 2. When
+        ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.post(ACCUM_URL)
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+                        .accept(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+                        .content(objectMapper.writeValueAsString(requestDTO))
+        ).andDo(print());
+
+
+        // # 3. Then
+        resultActions.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("resultCode").value(ExceptionResult.NOT_FOUND_BARCODE_INFO.getCode().value()))
+                .andExpect(jsonPath("resultMessage").value(ExceptionResult.NOT_FOUND_BARCODE_INFO.getMessage()));
+    }
+
+    @Test
+    @DisplayName("멤버십적립_바코드_실패_적립메소드_리턴값없음")
+    public void accum_fail_proc_not_response() throws Exception {
+        // # 1. Given
+        MyMembershipAccumRequestDTO requestDTO = MyMembershipAccumRequestDTO.builder()
+                .barCd("123")
+                .franchisseId("2222")
+                .tradeAmt(1000)
+                .build();
+
+        when(myMembershipService.accum(any(HashMap.class)))
+                .thenReturn(null);
+
+        // # 2. When
+        ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.post(ACCUM_URL)
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+                        .accept(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+                        .content(objectMapper.writeValueAsString(requestDTO))
+        ).andDo(print());
+
+
+        // # 3. Then
+        resultActions.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("resultCode").value(ExceptionResult.NOT_FOUND_MEMBERSHIP.getCode().value()))
+                .andExpect(jsonPath("resultMessage").value(ExceptionResult.NOT_FOUND_MEMBERSHIP.getMessage()));
+    }
+
+
+
+    @Test
+    @DisplayName("멤버십적립_성공")
+    public void accum_success() throws Exception {
+        // # 1. Given
+        MyMembershipAccumRequestDTO requestDTO = MyMembershipAccumRequestDTO.builder()
+                .barCd("123")
+                .franchisseId("2222")
+                .tradeAmt(1000)
+                .build();
+
+
+        String mspId = "123";
+        when(myMembershipService.accum(any(HashMap.class)))
+                .thenReturn(MyMspDetailInfoVO.builder()
+                        .accountId(5L)
+                        .mspId(mspId)
+                        .franchiseeInfo(MembershipFranchiseeVO.builder()
+                                .mspId(mspId)
+                                .franchiseeId("2222")
+                                .build())
+                        .gradeBenefitInfo(MembershipGradeVO.builder()
+                                .mspGradeCd("COMMON")
+                                .mspId(mspId)
+                                .build())
+                        .membershipInfo(MembershipVO.builder()
+                                .mspId(mspId).build())
+                        .build());
+
+        doNothing().when(myMembershipService).calcTotalPointAndUpdateGrade(anyLong(), anyString());
+        when(myMembershipService.calcTotalPointAndUpdateGrade(anyLong(), anyString()))
+                .thenReturn(MyMembershipVO.builder()
+                        .totalAccumPoint(3000)
+                        .mspGradeCd("COMMON")
+                        .build());
+
+        // # 2. When
+        ResultActions resultActions = mockMvc.perform(
+                MockMvcRequestBuilders.post(ACCUM_URL)
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+                        .accept(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+                        .content(objectMapper.writeValueAsString(requestDTO))
+        ).andDo(print());
+
+
+        // # 3. Then
+        resultActions.andExpect(status().isCreated())
+                .andExpect(jsonPath("resultCode").value(Code.RESPONSE_CODE_SUCCESS))
+                .andExpect(jsonPath("resultMessage").value(Code.RESPONSE_MESSAGE_SUCCESS))
+                .andExpect(jsonPath("mspId").value(mspId))
+                .andExpect(jsonPath("$.franchiseeInfo.franchiseeId").value("2222"))
+                .andExpect(jsonPath("$.membershipInfo.mspId").value(mspId))
+                .andExpect(jsonPath("$.gradeBenefitInfo.mspGradeCd").value("COMMON"));
+
+        verify(myMembershipService, times(1)).accum(any(HashMap.class));
+        verify(myMembershipService, times(1)).calcTotalPointAndUpdateGrade(anyLong(), anyString());
+
+    }
+
 
 }
 

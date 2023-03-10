@@ -22,6 +22,8 @@ public class MyMembershipService {
 
     private final MyMembershipMapper myMembershipMapper;
 
+    private final AccountService accountService;
+
 
     /**
      * 바코드 생성 (현재일자 + 시퀀스)
@@ -151,8 +153,11 @@ public class MyMembershipService {
         if(franchiseeInfoVO.getStatus() != Code.STATUS_USE)
             throw new BizException(ExceptionResult.NOT_ACTIVE_FRANCHISEE);
 
-        // #3. 적립내역등록
         Long accountId = response.getAccountId();
+        // 계정 체크
+        AccountVO accountVO = accountService.getInfoAndCheckStatus(accountId);
+
+        // #3. 적립내역등록
         String mspId = response.getMspId();
         int accumRat = response.getGradeBenefitInfo().getAccumRat();
         int accumPoint = NumberUtil.getCalcPerAmt(tradeAmt, accumRat);
@@ -221,7 +226,7 @@ public class MyMembershipService {
      * @return
      * @throws Exception
      */
-    public void calcTotalPointAndUpdateGrade(Long accountId, String mspId) throws Exception {
+    public MyMembershipVO calcTotalPointAndUpdateGrade(Long accountId, String mspId) throws Exception {
         logger.info("My Membership Update Grade Start");
 
         // 1. 적립 총액 가져오기
@@ -240,6 +245,14 @@ public class MyMembershipService {
                 .build());
 
         logger.info("My Membership Update Grade Success");
+
+        return MyMembershipVO.builder()
+                    .accountId(accountId)
+                    .mspId(mspId)
+                    .mspGradeCd(targetGradeCd)
+                    .totalAccumPoint(totalAccumPoint)
+                    .build();
+
     }
 
 
