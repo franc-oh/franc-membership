@@ -161,6 +161,7 @@ public class MyMembershipService {
         String mspId = response.getMspId();
         int accumRat = response.getGradeBenefitInfo().getAccumRat();
         int accumPoint = NumberUtil.getCalcPerAmt(tradeAmt, accumRat);
+        String expireYmd = DateUtil.getAddMonth(membershipInfoVO.getActiveMonths());
 
         MyMembershipAccumHisVO myMembershipAccumHisVO = MyMembershipAccumHisVO.builder()
                 .cancelBarCd(getBarcode())
@@ -171,9 +172,11 @@ public class MyMembershipService {
                 .mspGradeCd(response.getMspGradeCd())
                 .accumRat(accumRat)
                 .accumPoint(accumPoint)
+                .expireYmd(expireYmd)
                 .build();
 
         myMembershipMapper.saveAccumHis(myMembershipAccumHisVO);
+        response.setProcInfo(myMembershipAccumHisVO);
 
         logger.info("My Membership Accum Success!!");
 
@@ -220,40 +223,12 @@ public class MyMembershipService {
     }
 
     /**
-     * 적립 포인트 총액 계산 + 등급갱신
-     * @param accountId
-     * @param mspId
-     * @return
+     * 등급 및 총액 업데이트
+     * @param vo
      * @throws Exception
      */
-    public MyMembershipVO calcTotalPointAndUpdateGrade(Long accountId, String mspId) throws Exception {
-        logger.info("My Membership Update Grade Start");
-
-        // 1. 적립 총액 가져오기
-        int totalAccumPoint = getMyMembershipTotalAccumPoint(accountId, mspId);
-
-        // 2. 적립총액에 따른 등급정보 가져오기
-        MembershipGradeVO targetGradeVO = getMembershipGradeByPoint(mspId, totalAccumPoint);
-
-        String targetGradeCd = targetGradeVO.getMspGradeCd();
-
-        myMembershipMapper.updatePointAndGrade(MyMembershipVO.builder()
-                .accountId(accountId)
-                .mspId(mspId)
-                .mspGradeCd(targetGradeCd)
-                .totalAccumPoint(totalAccumPoint)
-                .build());
-
-        logger.info("My Membership Update Grade Success");
-
-        return MyMembershipVO.builder()
-                    .accountId(accountId)
-                    .mspId(mspId)
-                    .mspGradeCd(targetGradeCd)
-                    .totalAccumPoint(totalAccumPoint)
-                    .build();
-
+    public void updatePointAndGrade(MyMembershipVO vo) throws Exception {
+        myMembershipMapper.updatePointAndGrade(vo);
     }
-
 
 }

@@ -50,9 +50,7 @@ public class ControllerExceptionHandler {
         e.printStackTrace();
 
         String errorCode = String.valueOf(ExceptionResult.UNKNOWN_EXCEPTION.getCode().value());
-        String errorMessage = e.getMessage() != null
-                ? e.getMessage()
-                : ExceptionResult.UNKNOWN_EXCEPTION.getMessage();
+        String errorMessage = ExceptionResult.UNKNOWN_EXCEPTION.getMessage();
 
         return ResponseEntity.status(ExceptionResult.UNKNOWN_EXCEPTION.getCode())
                 .body(buildExceptionResponse(errorCode, errorMessage));

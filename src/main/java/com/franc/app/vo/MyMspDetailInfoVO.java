@@ -14,5 +14,6 @@ public class MyMspDetailInfoVO extends MyMembershipVO {
     private MembershipVO membershipInfo;
     private MembershipFranchiseeVO franchiseeInfo;
     private MembershipGradeVO gradeBenefitInfo;
+    private MyMembershipAccumHisVO procInfo;
 
 }

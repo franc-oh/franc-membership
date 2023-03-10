@@ -28,6 +28,7 @@ public class MyMembershipAccumResponseDTO {
     private Integer tradeAmt;
     private Integer accumPoint;
     private Integer discAmt;
+    private String nextMspGradeCd;
 
 
 }

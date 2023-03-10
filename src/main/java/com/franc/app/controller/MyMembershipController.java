@@ -2,14 +2,14 @@ package com.franc.app.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.franc.app.code.Code;
+import com.franc.app.config.ModelMapperConfig;
 import com.franc.app.dto.*;
 import com.franc.app.exception.BizException;
 import com.franc.app.exception.ExceptionResult;
 import com.franc.app.service.AccountService;
 import com.franc.app.service.MyMembershipService;
-import com.franc.app.vo.AccountVO;
-import com.franc.app.vo.MyMembershipVO;
-import com.franc.app.vo.MyMspDetailInfoVO;
+import com.franc.app.util.NumberUtil;
+import com.franc.app.vo.*;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -101,7 +101,7 @@ public class MyMembershipController {
 
         logger.info("멤버십적립_Request => {}", request.toString());
 
-        // #1. 바코드로 적립처리 + 멤버십정보 가져오기
+        // #1. 바코드로 적립처리 + 멤버십상세정보 가져오기
         Map<String, Object> requestMap = objectMapper.convertValue(request, HashMap.class);
 
         MyMspDetailInfoVO accumVO = myMembershipService.accum(requestMap);
@@ -109,11 +109,45 @@ public class MyMembershipController {
             throw new BizException(ExceptionResult.NOT_FOUND_MEMBERSHIP);
         }
 
+        Long accountId = accumVO.getAccountId();
+        String mspId = accumVO.getMspId();
+        int tradeAmt = request.getTradeAmt();
 
+        // #2. 적립총액 가져오기 및 총액에 해당하는 등급 가져오기
+        int totalAccumPoint = myMembershipService.getMyMembershipTotalAccumPoint(accountId, mspId);
+        MembershipGradeVO targetGradeVO = myMembershipService.getMembershipGradeByPoint(mspId, totalAccumPoint);
+        String targetGradeCd = targetGradeVO.getMspGradeCd();
 
-        // #3. 응답
+        // #3. 적립총액 및 등급 갱신
+        myMembershipService.updatePointAndGrade(MyMembershipVO.builder()
+                .accountId(accountId)
+                .mspId(mspId)
+                .mspGradeCd(targetGradeCd)
+                .totalAccumPoint(totalAccumPoint)
+                .build());
+
+        MembershipVO membershipInfo = accumVO.getMembershipInfo();
+        MembershipGradeVO gradeBenefitInfo = accumVO.getGradeBenefitInfo();
+        MembershipFranchiseeVO franchiseeInfo = accumVO.getFranchiseeInfo();
+        MyMembershipAccumHisVO procInfo = accumVO.getProcInfo();
+        int discRat = gradeBenefitInfo.getDiscRat();
+
+        // #4. 응답
         response.setResultCode(Code.RESPONSE_CODE_SUCCESS);
         response.setResultMessage(Code.RESPONSE_MESSAGE_SUCCESS);
+        response.setAccountId(accountId);
+        response.setMspId(mspId);
+        response.setTradeAmt(tradeAmt);
+        response.setMspNm(membershipInfo.getMspNm());
+        response.setFranchiseeId(franchiseeInfo.getFranchiseeId());
+        response.setFranchiseeNm(franchiseeInfo.getFranchiseeNm());
+        response.setMspGradeCd(gradeBenefitInfo.getMspGradeCd());
+        response.setAccumRat(procInfo.getAccumRat());
+        response.setAccumPoint(procInfo.getAccumPoint());
+        response.setDiscRat(discRat);
+        response.setDiscAmt(NumberUtil.getCalcPerAmt(tradeAmt, discRat));
+        response.setTotalAccumPoint(totalAccumPoint);
+        response.setNextMspGradeCd(targetGradeCd);
 
         logger.info("멤버십적립_Response => {}", response.toString());
 

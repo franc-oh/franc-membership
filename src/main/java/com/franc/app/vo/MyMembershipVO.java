@@ -6,7 +6,7 @@ import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDateTime;
 
-@Getter
+@Getter @Setter
 @ToString
 @EqualsAndHashCode(of = {"accountId", "mspId"})
 @NoArgsConstructor

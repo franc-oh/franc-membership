@@ -351,7 +351,7 @@ public class MyMembershipControllerTests {
         // # 1. Given
         MyMembershipAccumRequestDTO requestDTO = MyMembershipAccumRequestDTO.builder()
                 .barCd("123")
-                .franchisseId("2222")
+                .franchiseeId("2222")
                 .tradeAmt(1000)
                 .build();
 
@@ -379,7 +379,7 @@ public class MyMembershipControllerTests {
         // # 1. Given
         MyMembershipAccumRequestDTO requestDTO = MyMembershipAccumRequestDTO.builder()
                 .barCd("123")
-                .franchisseId("2222")
+                .franchiseeId("2222")
                 .tradeAmt(1000)
                 .build();
 
@@ -401,20 +401,18 @@ public class MyMembershipControllerTests {
                 .andExpect(jsonPath("resultMessage").value(ExceptionResult.NOT_FOUND_MEMBERSHIP.getMessage()));
     }
 
-
-
     @Test
     @DisplayName("멤버십적립_성공")
     public void accum_success() throws Exception {
         // # 1. Given
         MyMembershipAccumRequestDTO requestDTO = MyMembershipAccumRequestDTO.builder()
                 .barCd("123")
-                .franchisseId("2222")
+                .franchiseeId("2222")
                 .tradeAmt(1000)
                 .build();
 
 
-        String mspId = "123";
+        String mspId = "M230227000001";
         when(myMembershipService.accum(any(HashMap.class)))
                 .thenReturn(MyMspDetailInfoVO.builder()
                         .accountId(5L)
@@ -422,21 +420,32 @@ public class MyMembershipControllerTests {
                         .franchiseeInfo(MembershipFranchiseeVO.builder()
                                 .mspId(mspId)
                                 .franchiseeId("2222")
+                                .franchiseeNm("dddd")
                                 .build())
                         .gradeBenefitInfo(MembershipGradeVO.builder()
                                 .mspGradeCd("COMMON")
                                 .mspId(mspId)
+                                .accumRat(3)
+                                .discRat(3)
                                 .build())
                         .membershipInfo(MembershipVO.builder()
                                 .mspId(mspId).build())
+                        .procInfo(MyMembershipAccumHisVO.builder()
+                                .accumRat(3)
+                                .accumPoint(500)
+                                .build())
                         .build());
 
-        doNothing().when(myMembershipService).calcTotalPointAndUpdateGrade(anyLong(), anyString());
-        when(myMembershipService.calcTotalPointAndUpdateGrade(anyLong(), anyString()))
-                .thenReturn(MyMembershipVO.builder()
-                        .totalAccumPoint(3000)
-                        .mspGradeCd("COMMON")
+        when(myMembershipService.getMyMembershipTotalAccumPoint(anyLong(), anyString()))
+                .thenReturn(10000);
+
+        when(myMembershipService.getMembershipGradeByPoint(anyString(), anyInt()))
+                .thenReturn(MembershipGradeVO.builder()
+                        .mspGradeCd("GOLD")
                         .build());
+
+        doNothing().when(myMembershipService).updatePointAndGrade(any(MyMembershipVO.class));
+
 
         // # 2. When
         ResultActions resultActions = mockMvc.perform(
@@ -452,12 +461,13 @@ public class MyMembershipControllerTests {
                 .andExpect(jsonPath("resultCode").value(Code.RESPONSE_CODE_SUCCESS))
                 .andExpect(jsonPath("resultMessage").value(Code.RESPONSE_MESSAGE_SUCCESS))
                 .andExpect(jsonPath("mspId").value(mspId))
-                .andExpect(jsonPath("$.franchiseeInfo.franchiseeId").value("2222"))
-                .andExpect(jsonPath("$.membershipInfo.mspId").value(mspId))
-                .andExpect(jsonPath("$.gradeBenefitInfo.mspGradeCd").value("COMMON"));
+                .andExpect(jsonPath("totalAccumPoint").value(10000))
+                .andExpect(jsonPath("nextMspGradeCd").value("GOLD"));
 
         verify(myMembershipService, times(1)).accum(any(HashMap.class));
-        verify(myMembershipService, times(1)).calcTotalPointAndUpdateGrade(anyLong(), anyString());
+        verify(myMembershipService, times(1)).getMyMembershipTotalAccumPoint(anyLong(), anyString());
+        verify(myMembershipService, times(1)).getMembershipGradeByPoint(anyString(), anyInt());
+        verify(myMembershipService, times(1)).updatePointAndGrade(any(MyMembershipVO.class));
 
     }
 

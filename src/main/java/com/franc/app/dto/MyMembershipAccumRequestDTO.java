@@ -16,7 +16,7 @@ public class MyMembershipAccumRequestDTO {
     private String barCd;
 
     @NotNull
-    private String franchisseId;
+    private String franchiseeId;
 
     @NotNull
     @Min(0)

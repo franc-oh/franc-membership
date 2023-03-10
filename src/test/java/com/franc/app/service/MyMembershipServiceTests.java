@@ -5,7 +5,6 @@ import com.franc.app.exception.BizException;
 import com.franc.app.exception.ExceptionResult;
 import com.franc.app.mapper.MyMembershipMapper;
 import com.franc.app.vo.*;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
