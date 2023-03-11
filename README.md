@@ -5,8 +5,6 @@
 
 ## Description
 
----
-
 * 등급별로 차등 할인을 해주는 멤버십 서비스를 제공한다.
 * 멤버십 회원들은 결제 시 바코드를 제시, 스캔 시 할인과 포인트를 적립 할 수 있다.
 * 적립으로 쌓인 포인트가 등업 기준을 충족하면 자동으로 등업된다.
@@ -14,8 +12,6 @@
 * 멤버십 혜택은 멤버십 가맹점에서만 받을 수 있다.
 
 ## Environment
-
----
 
 * Java 11
 * Spring Boot 2.7.x
@@ -28,13 +24,10 @@
 
 ## Prerequisite
 
----
 
 ## TABLE
 
 * 'schema.sql', 'data.sql'에 테이블 설계정보 및 기준데이터 등록
-
----
 
 ### 1. 회원정보 (TB_ACCOUNT)
 
@@ -66,8 +59,6 @@
 - 멤버십 별 거래내역과 적립내역을 관리, 취소_바코드를 통해 취소 가능
 
 ## Usage
-
---- 
 
 ### 1. Install
 `$ git clone https://github.com/franc-oh/franc-membership.git`
