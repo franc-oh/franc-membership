@@ -1,7 +1,5 @@
 package com.franc.app.service;
 
-import com.franc.app.exception.BizException;
-import com.franc.app.exception.ExceptionResult;
 import com.franc.app.mapper.MembershipMapper;
 import com.franc.app.vo.MembershipVO;
 import com.franc.app.vo.MspAndMyMspInfoVO;

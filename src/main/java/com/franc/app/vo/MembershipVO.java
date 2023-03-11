@@ -1,6 +1,7 @@
 package com.franc.app.vo;
 
 import com.franc.app.code.Code;
+import com.franc.app.code.Status;
 import com.franc.app.util.PageUtil;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -20,7 +21,7 @@ public class MembershipVO {
     private String mspNm;
 
     @Builder.Default
-    private Character status = Code.STATUS_USE;
+    private Character status = Status.USE.getCode();
     private String mspInfo;
     private String mspImgUrl;
     private String homepageUrl;

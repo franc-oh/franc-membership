@@ -1,7 +1,8 @@
 package com.franc.app.service;
 
 
-import com.franc.app.code.Code;
+import com.franc.app.code.AccountGrade;
+import com.franc.app.code.Status;
 import com.franc.app.exception.BizException;
 import com.franc.app.exception.ExceptionResult;
 import com.franc.app.mapper.AccountMapper;
@@ -79,8 +80,8 @@ public class AccountServiceTests {
         AccountVO paramVo = AccountVO.builder()
                 .accountId(accountId)
                 .accountNm("테스트")
-                .status(Code.STATUS_USE)
-                .accountGrade(Code.ACCOUNT_GRADE_USER)
+                .status(Status.USE.getCode())
+                .accountGrade(AccountGrade.USER.getCode())
                 .build();
 
         when(accountMapper.findById(anyLong()))
@@ -92,15 +93,15 @@ public class AccountServiceTests {
         // # 3. Then
         assertThat(accountVo).isNotNull();
         assertThat(accountVo.getAccountId()).isEqualTo(accountId);
-        assertThat(accountVo.getStatus()).isEqualTo(Code.STATUS_USE);
+        assertThat(accountVo.getStatus()).isEqualTo(Status.USE.getCode());
 
         verify(accountMapper, times(1)).findById(accountId);
     }
 
     public static Stream<Arguments> notActiveAccountList() {
         return Stream.of(
-                Arguments.of(AccountVO.builder().accountId(3L).status(Code.STATUS_STOP).build()),
-                Arguments.of(AccountVO.builder().accountId(3L).status(Code.STATUS_WITHDRAWAL).build())
+                Arguments.of(AccountVO.builder().accountId(3L).status(Status.STOP.getCode()).build()),
+                Arguments.of(AccountVO.builder().accountId(3L).status(Status.WITHDRAWAL.getCode()).build())
         );
     }
 

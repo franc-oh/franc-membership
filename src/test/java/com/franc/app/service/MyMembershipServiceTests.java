@@ -1,6 +1,7 @@
 package com.franc.app.service;
 
-import com.franc.app.code.Code;
+import com.franc.app.code.MembershipGrade;
+import com.franc.app.code.Status;
 import com.franc.app.exception.BizException;
 import com.franc.app.exception.ExceptionResult;
 import com.franc.app.mapper.MyMembershipMapper;
@@ -32,6 +33,9 @@ public class MyMembershipServiceTests {
 
     @Mock
     private MyMembershipMapper myMembershipMapper;
+
+    @Mock
+    private AccountService accountService;
 
     @Spy
     private ModelMapper modelMapper;
@@ -77,8 +81,8 @@ public class MyMembershipServiceTests {
     @DisplayName("등록_실패_기가입")
     public void save_fail_already_join() throws Exception {
         // # Given
-        MyMembershipVO vo = buildVo(accountId, mspId, Code.STATUS_USE,
-                100, Code.MEMBERSHIP_GRADE_COMMON, "20230304173630000001", null);
+        MyMembershipVO vo = buildVo(accountId, mspId, Status.USE.getCode(),
+                100, MembershipGrade.COMMON.getCode(), "20230304173630000001", null);
 
         when(myMembershipMapper.findById(any(HashMap.class)))
                 .thenReturn(vo);
@@ -96,8 +100,8 @@ public class MyMembershipServiceTests {
     @DisplayName("등록_실패_탈퇴후1일안됨")
     public void save_fail_withdrawal_yet() throws Exception {
         // # Given
-        MyMembershipVO vo = buildVo(accountId, mspId, Code.STATUS_WITHDRAWAL,
-                100, Code.MEMBERSHIP_GRADE_COMMON, "20230304173630000001", LocalDateTime.now());
+        MyMembershipVO vo = buildVo(accountId, mspId, Status.WITHDRAWAL.getCode(),
+                100, MembershipGrade.COMMON.getCode(), "20230304173630000001", LocalDateTime.now());
 
         when(myMembershipMapper.findById(any(HashMap.class)))
                 .thenReturn(vo);
@@ -115,8 +119,8 @@ public class MyMembershipServiceTests {
     @DisplayName("등록_성공_신규")
     public void save_success_new_join() throws Exception {
         // # Given
-        MyMembershipVO vo = buildVo(accountId, mspId, Code.STATUS_USE,
-                0, Code.MEMBERSHIP_GRADE_COMMON, "20230304173630000001", null);
+        MyMembershipVO vo = buildVo(accountId, mspId, Status.USE.getCode(),
+                0, MembershipGrade.COMMON.getCode(), "20230304173630000001", null);
 
         when(myMembershipMapper.findById(any(HashMap.class)))
                 .thenReturn(null);
@@ -134,8 +138,8 @@ public class MyMembershipServiceTests {
     @DisplayName("등록_성공_재가입")
     public void save_success_re_join() throws Exception {
         // # Given
-        MyMembershipVO vo = buildVo(accountId, mspId, Code.STATUS_WITHDRAWAL,
-                0, Code.MEMBERSHIP_GRADE_COMMON, "20230304173630000001", LocalDateTime.now().minusDays(1));
+        MyMembershipVO vo = buildVo(accountId, mspId, Status.WITHDRAWAL.getCode(),
+                0, MembershipGrade.COMMON.getCode(), "20230304173630000001", LocalDateTime.now().minusDays(1));
 
         when(myMembershipMapper.findById(any(HashMap.class)))
                 .thenReturn(vo);
@@ -154,8 +158,8 @@ public class MyMembershipServiceTests {
     @DisplayName("탈퇴_실패_미가입")
     public void withdrawal_fail_not_join() throws Exception {
         // # Given
-        MyMembershipVO vo = buildVo(accountId, mspId, Code.STATUS_WITHDRAWAL,
-                0, Code.MEMBERSHIP_GRADE_COMMON, "20230304173630000001", LocalDateTime.now().minusDays(1));
+        MyMembershipVO vo = buildVo(accountId, mspId, Status.WITHDRAWAL.getCode(),
+                0, MembershipGrade.COMMON.getCode(), "20230304173630000001", LocalDateTime.now().minusDays(1));
 
         when(myMembershipMapper.findById(any(HashMap.class)))
                 .thenReturn(null);
@@ -173,8 +177,8 @@ public class MyMembershipServiceTests {
     @DisplayName("탈퇴_실패_이미탈퇴")
     public void withdrawal_fail_already() throws Exception {
         // # Given
-        MyMembershipVO vo = buildVo(accountId, mspId, Code.STATUS_WITHDRAWAL,
-                0, Code.MEMBERSHIP_GRADE_COMMON, "20230304173630000001", LocalDateTime.now().minusDays(1));
+        MyMembershipVO vo = buildVo(accountId, mspId, Status.WITHDRAWAL.getCode(),
+                0, MembershipGrade.COMMON.getCode(), "20230304173630000001", LocalDateTime.now().minusDays(1));
 
         when(myMembershipMapper.findById(any(HashMap.class)))
                 .thenReturn(vo);
@@ -192,8 +196,8 @@ public class MyMembershipServiceTests {
     @DisplayName("탈퇴_성공")
     public void withdrawal_success() throws Exception {
         // # Given
-        MyMembershipVO vo = buildVo(accountId, mspId, Code.STATUS_USE,
-                0, Code.MEMBERSHIP_GRADE_COMMON, "20230304173630000001", null);
+        MyMembershipVO vo = buildVo(accountId, mspId, Status.USE.getCode(),
+                0, MembershipGrade.COMMON.getCode(), "20230304173630000001", null);
 
         when(myMembershipMapper.findById(any(HashMap.class)))
                 .thenReturn(vo);
@@ -290,7 +294,7 @@ public class MyMembershipServiceTests {
                 .barCd(barCd)
                 .membershipInfo(MembershipVO.builder()
                         .mspId(mspId)
-                        .status(Code.STATUS_STOP)
+                        .status(Status.STOP.getCode())
                         .build())
                 .franchiseeInfo(MembershipFranchiseeVO.builder().build())
                 .gradeBenefitInfo(MembershipGradeVO.builder().build())
@@ -328,25 +332,28 @@ public class MyMembershipServiceTests {
                 .accountId(accountId)
                 .mspId(mspId)
                 .barCd(barCd)
-                .mspGradeCd(Code.MEMBERSHIP_GRADE_COMMON)
+                .mspGradeCd(MembershipGrade.COMMON.getCode())
                 .membershipInfo(MembershipVO.builder()
                         .mspId(mspId)
-                        .status(Code.STATUS_USE)
+                        .status(Status.USE.getCode())
                         .build())
                 .franchiseeInfo(MembershipFranchiseeVO.builder()
                         .mspId(mspId)
                         .franchiseeId(franchiseeId)
-                        .status(Code.STATUS_USE)
+                        .status(Status.USE.getCode())
                         .build())
                 .gradeBenefitInfo(MembershipGradeVO.builder()
                         .mspId(mspId)
-                        .mspGradeCd(Code.MEMBERSHIP_GRADE_COMMON)
+                        .mspGradeCd(MembershipGrade.COMMON.getCode())
                         .accumRat(3)
                         .build())
                 .build();
 
         when(myMembershipMapper.findDetailByBarCdAndFranchiseeId(anyString(), anyString()))
                 .thenReturn(myMspDetailInfoVO);
+
+        when(accountService.getInfoAndCheckStatus(anyLong()))
+                .thenReturn(AccountVO.builder().build());
 
         doNothing().when(myMembershipMapper)
                 .saveAccumHis(any(MyMembershipAccumHisVO.class));

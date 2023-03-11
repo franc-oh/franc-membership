@@ -1,6 +1,6 @@
 package com.franc.app.vo;
 
-import com.franc.app.code.Code;
+import com.franc.app.code.Status;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -18,7 +18,7 @@ public class MembershipFranchiseeVO {
     private String franchiseeId;
     private String franchiseeNm;
     @Builder.Default
-    private Character status = Code.STATUS_USE;
+    private Character status = Status.USE.getCode();
 
     private String zipCd;
     private String addr1;

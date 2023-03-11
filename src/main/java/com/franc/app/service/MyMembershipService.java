@@ -1,6 +1,6 @@
 package com.franc.app.service;
 
-import com.franc.app.code.Code;
+import com.franc.app.code.Status;
 import com.franc.app.exception.BizException;
 import com.franc.app.exception.ExceptionResult;
 import com.franc.app.mapper.MyMembershipMapper;
@@ -68,12 +68,12 @@ public class MyMembershipService {
         boolean withdrawal = false;
         if(myMembershipVo != null) {
             // '사용' 상태 => 중복 건
-            if(Code.STATUS_USE == myMembershipVo.getStatus()) {
+            if(Status.USE.getCode() == myMembershipVo.getStatus()) {
                 throw new BizException(ExceptionResult.ALREADY_JOIN_MEMBERSHIP);
             }
 
             // '탈퇴' 상태 => 탈퇴 당일 재가입인지 체크 및 탈퇴 플래그 변경
-            if(Code.STATUS_WITHDRAWAL == myMembershipVo.getStatus()) {
+            if(Status.WITHDRAWAL.getCode() == myMembershipVo.getStatus()) {
                 if(DateUtil.compareNow(myMembershipVo.getWithdrawalDate()) >= 0) {
                     throw new BizException(ExceptionResult.RE_JOIN_NOT_POSSIBLE_WITHDRAWAL);
                 }
@@ -114,7 +114,7 @@ public class MyMembershipService {
         if(myMembershipVo == null) {
             throw new BizException(ExceptionResult.NOT_JOIN_MEMBERSHIP);
         }
-        if(Code.STATUS_WITHDRAWAL == myMembershipVo.getStatus() || myMembershipVo.getWithdrawalDate() != null) {
+        if(Status.WITHDRAWAL.getCode() == myMembershipVo.getStatus() || myMembershipVo.getWithdrawalDate() != null) {
             throw new BizException(ExceptionResult.ALREADY_WITHDRAWAL_MEMBERSHIP);
         }
 
@@ -148,9 +148,9 @@ public class MyMembershipService {
             throw new BizException(ExceptionResult.NOT_FOUND_MEMBERSHIP);
 
         // #2. 가져온 상세정보를 통해 유효성 체크 및 적립데이터 셋팅
-        if(membershipInfoVO.getStatus() != Code.STATUS_USE)
+        if(membershipInfoVO.getStatus() != Status.USE.getCode())
             throw new BizException(ExceptionResult.NOT_ACTIVE_MEMBERSHIP);
-        if(franchiseeInfoVO.getStatus() != Code.STATUS_USE)
+        if(franchiseeInfoVO.getStatus() != Status.USE.getCode())
             throw new BizException(ExceptionResult.NOT_ACTIVE_FRANCHISEE);
 
         Long accountId = response.getAccountId();

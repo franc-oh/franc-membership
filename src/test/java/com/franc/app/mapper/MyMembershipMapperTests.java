@@ -1,6 +1,7 @@
 package com.franc.app.mapper;
 
-import com.franc.app.code.Code;
+import com.franc.app.code.MembershipGrade;
+import com.franc.app.code.Status;
 import com.franc.app.util.DateUtil;
 import com.franc.app.util.NumberUtil;
 import com.franc.app.vo.*;
@@ -101,7 +102,7 @@ public class MyMembershipMapperTests {
         assertThat(myMembership).isNotNull();
         assertThat(myMembership.getAccountId()).isEqualTo(accountId);
         assertThat(myMembership.getMspId()).isEqualTo(mspId);
-        assertThat(myMembership.getStatus()).isEqualTo(Code.STATUS_WITHDRAWAL);
+        assertThat(myMembership.getStatus()).isEqualTo(Status.WITHDRAWAL.getCode());
         assertThat(myMembership.getWithdrawalDate()).isNotNull();
 
     }
@@ -129,7 +130,7 @@ public class MyMembershipMapperTests {
         assertThat(resultVO).isNotNull();
         assertThat(resultVO.getAccountId()).isEqualTo(accountId);
         assertThat(resultVO.getMspId()).isEqualTo(mspId);
-        assertThat(resultVO.getStatus()).isEqualTo(Code.STATUS_USE);
+        assertThat(resultVO.getStatus()).isEqualTo(Status.USE.getCode());
         assertThat(resultVO.getFranchiseeInfo().getFranchiseeId()).isNotNull();
         assertThat(resultVO.getGradeBenefitInfo().getMspGradeCd()).isNotNull();
         assertThat(resultVO.getMembershipInfo().getMspId()).isNotNull();
@@ -158,7 +159,7 @@ public class MyMembershipMapperTests {
         // # 3. Then
         assertThat(chkAccumHisVO).isNotNull();
         assertThat(chkAccumHisVO.getCancelBarCd()).isEqualTo(cancelBarCd);
-        assertThat(chkAccumHisVO.getStatus()).isEqualTo(Code.STATUS_USE);
+        assertThat(chkAccumHisVO.getStatus()).isEqualTo(Status.USE.getCode());
         assertThat(chkAccumHisVO.getAccumDate()).isNotNull();
     }
 
@@ -224,7 +225,7 @@ public class MyMembershipMapperTests {
         // # 3. Then
         assertThat(gradeVO).isNotNull();
         assertThat(gradeVO.getMspId()).isEqualTo(mspId);
-        assertThat(gradeVO.getMspGradeCd()).isEqualTo(Code.MEMBERSHIP_GRADE_SILVER);
+        assertThat(gradeVO.getMspGradeCd()).isEqualTo(MembershipGrade.SILVER.getCode());
     }
 
     @Test

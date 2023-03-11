@@ -1,6 +1,7 @@
 package com.franc.app.vo;
 
-import com.franc.app.code.Code;
+import com.franc.app.code.MembershipGrade;
+import com.franc.app.code.Status;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -18,13 +19,13 @@ public class MyMembershipVO {
     private String mspId;
 
     @Builder.Default
-    private Character status = Code.STATUS_USE;
+    private Character status = Status.USE.getCode();
 
     @Builder.Default
     private Integer totalAccumPoint = 0;
 
     @Builder.Default
-    private String mspGradeCd = Code.MEMBERSHIP_GRADE_COMMON;
+    private String mspGradeCd = MembershipGrade.COMMON.getCode();
     private LocalDateTime insertDate;
     private LocalDateTime withdrawalDate;
     private String barCd;

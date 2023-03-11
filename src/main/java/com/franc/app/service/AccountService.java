@@ -1,6 +1,6 @@
 package com.franc.app.service;
 
-import com.franc.app.code.Code;
+import com.franc.app.code.Status;
 import com.franc.app.exception.BizException;
 import com.franc.app.exception.ExceptionResult;
 import com.franc.app.mapper.AccountMapper;
@@ -28,7 +28,7 @@ public class AccountService {
         }
 
         // #2. 사용자 상태 체크 => 정상 상태만 허용
-        if(accountVo.getStatus() != Code.STATUS_USE) {
+        if(accountVo.getStatus() != Status.USE.getCode()) {
             throw new BizException(ExceptionResult.NOT_ACTIVE_ACCOUNT);
         }
 

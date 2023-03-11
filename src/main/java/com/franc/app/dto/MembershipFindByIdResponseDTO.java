@@ -1,10 +1,8 @@
 package com.franc.app.dto;
 
-import com.franc.app.code.Code;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @Setter

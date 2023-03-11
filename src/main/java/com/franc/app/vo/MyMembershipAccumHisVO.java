@@ -1,7 +1,7 @@
 package com.franc.app.vo;
 
 
-import com.franc.app.code.Code;
+import com.franc.app.code.Status;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -18,7 +18,7 @@ public class MyMembershipAccumHisVO {
     private String cancelBarCd;
 
     @Builder.Default
-    private Character status = Code.STATUS_USE;
+    private Character status = Status.USE.getCode();
 
     private Long accountId;
     private String mspId;

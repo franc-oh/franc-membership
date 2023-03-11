@@ -1,6 +1,5 @@
 package com.franc.app.controller;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.franc.app.code.Code;
@@ -15,10 +14,8 @@ import com.franc.app.service.MembershipService;
 import com.franc.app.vo.AccountVO;
 import com.franc.app.vo.MembershipVO;
 import com.franc.app.vo.MspAndMyMspInfoVO;
-import com.franc.app.vo.MyMembershipVO;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -29,9 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/msp/membership")
