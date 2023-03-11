@@ -72,5 +72,5 @@
 
 ### 3. Run
 
-`java -jar ./franc-membership-1.0-SNAPSHOT.war --spring.profiles.active=test --jasypt.encryptor.password=franc_msp`
+`java -jar ./build/libs/franc-membership-1.0-SNAPSHOT.war --spring.profiles.active=test --jasypt.encryptor.password=franc_msp`
 
