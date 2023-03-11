@@ -4,6 +4,10 @@ server:
     uri-encoding: UTF-8
 
 spring:
+  output:
+    ansi:
+      enabled: always
+
   datasource:
     hikari:
       auto-commit: false

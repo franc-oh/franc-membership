@@ -8,13 +8,3 @@ spring:
     activate:
       on-profile: "prod"
 
-  output:
-    ansi:
-      enabled: always
-
-  datasource:
-    driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1
-    username: ENC(yiHWk9sHcZ8Ya0FTwaF3Il6WOCcyVQPq)
-    password: ENC(h8Y0ax0gnfZVqBNUXY/BtEQItzVmjeoB)
-
