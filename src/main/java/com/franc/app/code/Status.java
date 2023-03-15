@@ -14,7 +14,7 @@ public enum Status {
     private final Character code;
     private final String name;
 
-    public static Status of(final String code) {
+    public static Status of(final Character code) {
         return Status.of(code);
     }
 

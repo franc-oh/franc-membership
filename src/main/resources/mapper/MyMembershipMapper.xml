@@ -160,8 +160,8 @@
         )
     </insert>
 
-    <select id="findAccumHisById" parameterType="string" resultType="MyMembershipAccumHisVO">
-        /** MyMembershipMapper.findAccumHisById */
+    <select id="findByIdAccumHis" parameterType="string" resultType="MyMembershipAccumHisVO">
+        /** MyMembershipMapper.findByIdAccumHis */
         SELECT A.*
           FROM TB_MY_MEMBERSHIP_ACCUM_HIS A
          WHERE A.CANCEL_BAR_CD = #{cancelBarCd}
@@ -192,5 +192,108 @@
         AND ROWNUM = 1
     </select>
 
+
+    <select id="findAllAccumHis" parameterType="MyMembershipAccumHisVO" resultType="MyMembershipAccumHisVO">
+        /** MyMembershipMapper.findAllAccumHis */
+        SELECT A.*
+              ,(SELECT MSP_NM FROM TB_MEMBERSHIP WHERE MSP_ID = A.MSP_ID) AS MSP_NM
+              ,(SELECT FRANCHISEE_NM FROM TB_MEMBERSHIP_FRANCHISEE WHERE MSP_ID = A.MSP_ID AND FRANCHISEE_ID = A.FRANCHISEE_ID) AS FRANCHISEE_NM
+        FROM TB_MY_MEMBERSHIP_ACCUM_HIS A
+        WHERE A.ACCOUNT_ID = #{accountId}
+        <if test='mspId != null and !mspId.equals("")'>
+            AND A.MSP_ID = #{mspId}
+        </if>
+        <if test='status != null and !status.equals("")'>
+            AND A.STATUS = #{status}
+        </if>
+        ORDER BY A.ACCUM_DATE DESC
+        LIMIT NVL(#{offset}, 0), NVL(#{limit}, 20)
+    </select>
+
+
+    <resultMap id="myMspAccumHisDetailMap" type="MyMspAccumDetailInfoVO">
+        <id property="cancelBarCd" column="CANCEL_BAR_CD" javaType="string" />
+        <result property="accountId" column="ACCOUNT_ID" javaType="java.lang.Long" />
+        <result property="mspId" column="MSP_ID" javaType="string" />
+        <result property="franchiseeId" column="FRANCHISEE_ID" javaType="string" />
+        <result property="status" column="STATUS" javaType="java.lang.Character" />
+        <result property="tradeAmt" column="TRADE_AMT" javaType="int" />
+        <result property="accumRat" column="ACCUM_RAT" javaType="int" />
+        <result property="accumPoint" column="ACCUM_POINT" javaType="int" />
+        <result property="mspGradeCd" column="MSP_GRADE_CD" javaType="string" />
+        <result property="expireYmd" column="EXPIRE_YMD" javaType="string" />
+        <result property="expireYn" column="EXPIRE_YN" javaType="string" />
+        <result property="accumDate" column="ACCUM_DATE" javaType="java.time.LocalDateTime" />
+        <result property="accumCancelDate" column="ACCUM_CANCEL_DATE" javaType="java.time.LocalDateTime" />
+        <association property="franchiseeInfo" javaType="MembershipFranchiseeVO">
+            <id property="mspId" column="FRCHS_MSP_ID" javaType="string" />
+            <id property="franchiseeId" column="FRCHS_FRANCHISEE_ID" javaType="string" />
+            <result property="franchiseeNm" column="FRCHS_FRANCHISEE_NM" javaType="string" />
+            <result property="status" column="FRCHS_STATUS" javaType="java.lang.Character" />
+            <result property="zipCd" column="FRCHS_ZIP_CD" javaType="string" />
+            <result property="addr1" column="FRCHS_ADDR1" javaType="string" />
+            <result property="addr2" column="FRCHS_ADDR2" javaType="string" />
+            <result property="telNo" column="FRCHS_TEL_NO" javaType="string" />
+            <result property="bigo" column="FRCHS_BIGO" javaType="string" />
+        </association>
+        <association property="gradeBenefitInfo" javaType="MembershipGradeVO">
+            <id property="mspId" column="GRADE_MSP_ID" javaType="string" />
+            <id property="mspGradeCd" column="GRADE_MSP_GRADE_CD" javaType="string" />
+            <result property="gradeUpPointFr" column="GRADE_UP_POINT_FR" javaType="int" />
+            <result property="gradeUpPointTo" column="GRADE_UP_POINT_TO" javaType="int" />
+            <result property="accumRat" column="GRADE_ACCUM_RAT" javaType="int" />
+            <result property="discRat" column="GRADE_DISC_RAT" javaType="int" />
+        </association>
+        <association property="membershipInfo" javaType="MembershipVO">
+            <id property="mspId" column="M_MSP_ID" javaType="string" />
+            <result property="mspNm" column="M_MSP_NM" javaType="string" />
+            <result property="status" column="M_STATUS" javaType="java.lang.Character" />
+            <result property="mspInfo" column="M_MSP_INFO" javaType="string" />
+            <result property="mspImgUrl" column="M_MSP_IMG_URL" javaType="string" />
+            <result property="homepageUrl" column="M_HOMEPAGE_URL" javaType="string" />
+            <result property="activeMonths" column="M_ACTIVE_MONTHS" javaType="int" />
+            <result property="bigo" column="M_BIGO" javaType="string" />
+        </association>
+    </resultMap>
+    <select id="findByIdAccumHisDetail" parameterType="MyMspAccumDetailInfoVO" resultMap="myMspAccumHisDetailMap">
+    <![CDATA[
+        /** MyMembershipMapper.findByIdAccumHisDetail */
+        SELECT A.*
+             , CASE WHEN STR_TO_DATE(A.EXPIRE_YMD, '%Y%m%d') < NOW() THEN 'Y' ELSE 'N' END AS EXPIRE_YMD
+             , B.MSP_ID AS FRCHS_MSP_ID
+             , B.FRANCHISEE_ID AS FRCHS_FRANCHISEE_ID
+             , B.FRANCHISEE_NM AS FRCHS_FRANCHISEE_NM
+             , B.STATUS AS FRCHS_STATUS
+             , B.ZIP_CD AS FRCHS_ZIP_CD
+             , B.ADDR1 AS FRCHS_ADDR1
+             , B.ADDR2 AS FRCHS_ADDR2
+             , B.TEL_NO AS FRCHS_TEL_NO
+             , B.BIGO AS FRCHS_BIGO
+             , C.MSP_ID AS GRADE_MSP_ID
+             , C.MSP_GRADE_CD AS GRADE_MSP_GRADE_CD
+             , C.GRADE_UP_POINT_FR AS GRADE_UP_POINT_FR
+             , C.GRADE_UP_POINT_TO AS GRADE_UP_POINT_TO
+             , C.ACCUM_RAT AS GRADE_ACCUM_RAT
+             , C.DISC_RAT AS GRADE_DISC_RAT
+             , D.MSP_ID AS M_MSP_ID
+             , D.MSP_NM AS M_MSP_NM
+             , D.STATUS AS M_STATUS
+             , D.MSP_INFO AS M_MSP_INFO
+             , D.MSP_IMG_URL AS M_MSP_IMG_URL
+             , D.HOMEPAGE_URL AS M_HOMEPAGE_URL
+             , D.ACTIVE_MONTHS AS M_ACTIVE_MONTHS
+             , D.BIGO AS M_BIGO
+          FROM TB_MY_MEMBERSHIP_ACCUM_HIS A
+          LEFT OUTER JOIN TB_MEMBERSHIP_FRANCHISEE B
+            ON B.MSP_ID = A.MSP_ID
+            AND B.FRANCHISEE_ID = A.FRANCHISEE_ID
+          LEFT OUTER JOIN TB_MEMBERSHIP_GRADE C
+            ON C.MSP_ID = A.MSP_ID
+            AND C.MSP_GRADE_CD = A.MSP_GRADE_CD
+          LEFT OUTER JOIN TB_MEMBERSHIP D
+            ON D.MSP_ID = A.MSP_ID
+         WHERE A.CANCEL_BAR_CD = #{cancelBarCd}
+     ]]>
+    </select>
 
 </mapper>

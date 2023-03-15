@@ -1,12 +1,10 @@
 package com.franc.app.mapper;
 
-import com.franc.app.vo.MembershipGradeVO;
-import com.franc.app.vo.MyMembershipAccumHisVO;
-import com.franc.app.vo.MyMembershipVO;
-import com.franc.app.vo.MyMspDetailInfoVO;
+import com.franc.app.vo.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
 import java.util.Map;
 
 @Mapper
@@ -27,11 +25,15 @@ public interface MyMembershipMapper {
 
     void saveAccumHis(MyMembershipAccumHisVO vo) throws Exception;
 
-    MyMembershipAccumHisVO findAccumHisById(@Param("cancelBarCd") String cancelBarCd) throws Exception;
+    MyMembershipAccumHisVO findByIdAccumHis(@Param("cancelBarCd") String cancelBarCd) throws Exception;
 
     Integer getMyMembershipTotalAccumPoint(Map<String, Object> map) throws Exception;
 
     MembershipGradeVO getMembershipGradeByPoint(Map<String, Object> map) throws Exception;
+
+    List<MyMembershipAccumHisVO> findAllAccumHis(MyMembershipAccumHisVO vo) throws Exception;
+
+    MyMspAccumDetailInfoVO findByIdAccumHisDetail(@Param("cancelBarCd") String cancelBarCd) throws Exception;
 
 
 

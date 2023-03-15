@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -229,6 +230,30 @@ public class MyMembershipService {
      */
     public void updatePointAndGrade(MyMembershipVO vo) throws Exception {
         myMembershipMapper.updatePointAndGrade(vo);
+    }
+
+    /**
+     * 적립내역조회
+     * @param vo
+     * @return
+     * @throws Exception
+     */
+    public List<MyMembershipAccumHisVO> findAllAccumHis(MyMembershipAccumHisVO vo) throws Exception {
+        vo.setPaging();
+
+        return myMembershipMapper.findAllAccumHis(vo);
+    }
+
+    /**
+     * 적립상세조회
+     * @param cancelBarCd
+     * @return
+     * @throws Exception
+     */
+    public MyMspAccumDetailInfoVO findByIdAccumHisDetail(String cancelBarCd) throws Exception {
+        MyMspAccumDetailInfoVO vo = myMembershipMapper.findByIdAccumHisDetail(cancelBarCd);
+        vo.setStatusNm(Status.of(vo.getStatus()).getName());
+        return vo;
     }
 
 }
